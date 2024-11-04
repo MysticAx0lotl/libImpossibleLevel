@@ -24,26 +24,6 @@ namespace util::data {
     uint64_t byteswapU64(uint64_t val) {
         return BSWAP64(val);
     }
-
-    int16_t byteswapI16(int16_t value) {
-        return bit_cast<int16_t>(byteswapU16(bit_cast<uint16_t>(value)));
-    }
-
-    int32_t byteswapI32(int32_t value) {
-        return bit_cast<int32_t>(byteswapU32(bit_cast<uint32_t>(value)));
-    }
-
-    int64_t byteswapI64(int64_t value) {
-        return bit_cast<int64_t>(byteswapU64(bit_cast<uint64_t>(value)));
-    }
-
-    float byteswapF32(float value) {
-        return std::bit_cast<float>(byteswapU32(std::bit_cast<uint32_t>(value)));
-    }
-
-    double byteswapF64(double value) {
-        return std::bit_cast<double>(byteswapU64(bit_cast<uint64_t>(value)));
-    }
 #endif // __cpp_lib_byteswap
 };
 

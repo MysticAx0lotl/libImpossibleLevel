@@ -1,5 +1,4 @@
 #include "libImpossibleLevel.hpp"
-#include "byteswap.hpp"
 
 //Source: https://codereview.stackexchange.com/a/22907
 //modified to convert to and then return an unsigned char vector instead of a signed one
@@ -60,20 +59,19 @@ short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
 
 void writeJavaInt(std::ofstream& datafile, int sourceInt)
 {
-    //datafile << static_cast<unsigned char>(static_cast<unsigned int>(swapIntEndians(sourceInt)) & 0xff);
-    datafile << __builtin_bswap32(sourceInt);
+    unsigned int swapSource = __builtin_bswap32(static_cast<unsigned int>(sourceInt));
+    datafile.write(reinterpret_cast<const char*>(&swapSource), sizeof(swapSource));
 }
 
 void writeJavaShort(std::ofstream& datafile, short sourceShort)
 {
-    //datafile << static_cast<unsigned char>(static_cast<unsigned short>(swapShortEndians(sourceShort)) & 0xff);
-    datafile << __builtin_bswap16(sourceShort);
-
+    unsigned short swapSource = static_cast<unsigned short>((sourceShort >> 8) | (sourceShort << 8));
+    datafile.write(reinterpret_cast<const char*>(&swapSource), sizeof(swapSource));
 }
 
 void writeOtherData(std::ofstream& datafile, unsigned char data)
 {
-    datafile << data;
+    datafile.write(reinterpret_cast<const char*>(&data), sizeof(data));
 }
 
 levelObj::levelObj()
@@ -152,7 +150,8 @@ void levelObj::loadDataFromFile(char const* filepath)
         std::cout << "The current color trigger's xpos is " << currentBg->xPos << std::endl;
         currentByte += 4;
 
-        currentByte++; //skip over custom graphics boolean
+        currentBg->customGraphics = static_cast<bool>(level->at(currentByte));
+        currentByte++; //WILL BREAK HERE IF CUSTOM GRAPHICS ARE ENABLED FOR SOME REASON
 
         currentBg->colorID = readIntFromJava(*level, currentByte);
         std::cout << "The current color type is " << colorNames[currentBg->colorID] << std::endl;
@@ -275,7 +274,16 @@ void levelObj::writeDataToFile(char const* filepath)
     {
         tempCon = getBgConAtIndex(i);
         writeJavaInt(dataOut, tempCon.xPos);
-        writeJavaInt(dataOut, tempCon.colorID);
+        writeOtherData(dataOut, tempCon.customGraphics);
+        //Will need reworking once I can figure out how the custom graphics work
+        if(tempCon.customGraphics)
+        {
+            std::cout << "the program will break now";
+        }
+        else
+        {
+            writeJavaInt(dataOut, tempCon.colorID);
+        }
     }
     writeJavaInt(dataOut, numGravitySwitch);
     gravityChange tempGrav;
@@ -365,26 +373,36 @@ int levelObj::getFallingCount()
 
 void levelObj::addNewBlock(blockObj toAdd)
 {
+    toAdd.indexInVec = numBlocks;
+    numBlocks++;
     blockObjs->push_back(toAdd);
 }
 
 void levelObj::addBgCon(bgCon toAdd)
 {
+    toAdd.indexInVec = numBgSwitch;
+    numBgSwitch++;
     backgroundSwitches->push_back(toAdd);
 }
 
 void levelObj::addGravitySwitch(gravityChange toAdd)
 {
+    toAdd.indexInVec = numGravitySwitch;
+    numGravitySwitch++;
     gravitySwitches->push_back(toAdd);
 }
 
 void levelObj::addRisingBlocks(risingBlocks toAdd)
 {
+    toAdd.indexInVec = numRisingBlocks;
+    numRisingBlocks++;
     risingSections->push_back(toAdd);
 }
 
 void levelObj::addFallingBlocks(fallingBlocks toAdd)
 {
+    toAdd.indexInVec = numFallingBlocks;
+    numFallingBlocks++;
     fallingSections->push_back(toAdd);
 }
 

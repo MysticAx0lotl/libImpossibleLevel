@@ -21,6 +21,8 @@ struct bgCon //background switcher
     int xPos;
     int colorID;
     const char* colorName;
+    bool customGraphics;
+    const char* customFile;
     int indexInVec;
 };
 
