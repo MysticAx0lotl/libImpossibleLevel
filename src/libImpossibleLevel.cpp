@@ -88,7 +88,7 @@ levelObj::levelObj(char const* filename)
 void levelObj::loadDataFromFile(char const* filepath)
 {
     int currentByte = 0;
-    std::vector<unsigned char> *level = new std::vector<unsigned char>; 
+    std::vector<unsigned char> *level;
     std::vector<unsigned char> temp = ReadAllBytes(filepath);
     level = &temp;
     std::cout << "getting file format version" << std::endl;
