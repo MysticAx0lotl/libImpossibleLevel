@@ -1,4 +1,5 @@
 #include "libImpossibleLevel.hpp"
+#include "byteswap.hpp"
 
 //Source: https://codereview.stackexchange.com/a/22907
 //modified to convert to and then return an unsigned char vector instead of a signed one
