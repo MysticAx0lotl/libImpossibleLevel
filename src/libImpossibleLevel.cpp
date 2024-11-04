@@ -25,6 +25,108 @@ static std::vector<unsigned char> ReadAllBytes(char const* filename)
     return returnVal;
 }
 
+int swapIntEndians(int value) 
+{ 
+ 
+    // This var holds the leftmost 8 
+    // bits of the output. 
+    int leftmost_byte; 
+ 
+    // This holds the left middle 
+    // 8 bits of the output 
+    int left_middle_byle; 
+ 
+    // This holds the right middle 
+    // 8 bits of the output 
+    int right_middle_byte; 
+ 
+    // This holds the rightmost 
+    // 8 bits of the output 
+    int rightmost_byte; 
+ 
+    // To store the result 
+    // after conversion 
+    int result; 
+ 
+    // Get the rightmost 8 bits of the number 
+    // by anding it 0x000000FF. since the last 
+    // 8 bits are all ones, the result will be the 
+    // rightmost 8 bits of the number. this will 
+    // be converted into the leftmost 8 bits for the 
+    // output (swapping) 
+    leftmost_byte = (value & 0x000000FF) >> 0; 
+ 
+    // Similarly, get the right middle and left 
+    // middle 8 bits which will become 
+    // the left_middle bits in the output 
+    left_middle_byle = (value & 0x0000FF00) >> 8; 
+ 
+    right_middle_byte = (value & 0x00FF0000) >> 16; 
+ 
+    // Get the leftmost 8 bits which will be the 
+    // rightmost 8 bits of the output 
+    rightmost_byte = (value & 0xFF000000) >> 24; 
+ 
+    // Left shift the 8 bits by 24 
+    // so that it is shifted to the 
+    // leftmost end 
+    leftmost_byte <<= 24; 
+ 
+    // Similarly, left shift by 16 
+    // so that it is in the left_middle 
+    // position. i.e, it starts at the 
+    // 9th bit from the left and ends at the 
+    // 16th bit from the left 
+    left_middle_byle <<= 16; 
+ 
+    right_middle_byte <<= 8; 
+ 
+    // The rightmost bit stays as it is 
+    // as it is in the correct position 
+    rightmost_byte <<= 0; 
+ 
+    // Result is the concatenation of all these values. 
+    result = (leftmost_byte | left_middle_byle |
+              right_middle_byte | rightmost_byte); 
+ 
+    return result; 
+} 
+
+int swapShortEndians(short value) 
+{ 
+    short leftmost_byte; 
+
+    short rightmost_byte; 
+
+    short result; 
+ 
+    // Get the rightmost 8 bits of the number 
+    // by anding it 0x000000FF. since the last 
+    // 8 bits are all ones, the result will be the 
+    // rightmost 8 bits of the number. this will 
+    // be converted into the leftmost 8 bits for the 
+    // output (swapping) 
+    leftmost_byte = (value & 0x000000FF) >> 0;
+ 
+    // Get the leftmost 8 bits which will be the 
+    // rightmost 8 bits of the output 
+    rightmost_byte = (value & 0xFF000000) >> 8; 
+ 
+    // Left shift the 8 bits by 24 
+    // so that it is shifted to the 
+    // leftmost end 
+    leftmost_byte <<= 8; 
+ 
+    // The rightmost bit stays as it is 
+    // as it is in the correct position 
+    rightmost_byte <<= 0; 
+ 
+    // Result is the concatenation of all these values. 
+    result = (leftmost_byte | rightmost_byte); 
+ 
+    return result; 
+} 
+
 int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
 {
     unsigned int bit1, bit2, bit3, bit4;
@@ -57,25 +159,22 @@ short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
     return result;
 }
 
-void writeJavaInt(const char* filepath, unsigned int sourceInt)
+void writeJavaInt(std::ofstream& datafile, int sourceInt)
 {
-    std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
-    datafile << static_cast<unsigned char>(_byteswap_uint64(sourceInt) & 0xff);
-    return;
+    //datafile << static_cast<unsigned char>(static_cast<unsigned int>(swapIntEndians(sourceInt)) & 0xff);
+    datafile << __builtin_bswap32(sourceInt);
 }
 
-void writeJavaShort(const char* filepath, unsigned short sourceShort)
+void writeJavaShort(std::ofstream& datafile, short sourceShort)
 {
-    std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
-    datafile << static_cast<unsigned char>(_byteswap_ushort(sourceShort) & 0xff);
-    return;
+    //datafile << static_cast<unsigned char>(static_cast<unsigned short>(swapShortEndians(sourceShort)) & 0xff);
+    datafile << __builtin_bswap16(sourceShort);
+
 }
 
-void writeOtherData(const char* filepath, unsigned char data)
+void writeOtherData(std::ofstream& datafile, unsigned char data)
 {
-    std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
     datafile << data;
-    return;
 }
 
 levelObj::levelObj()
@@ -257,48 +356,50 @@ void levelObj::loadDataFromFile(char const* filepath)
 //very unfinished
 void levelObj::writeDataToFile(char const* filepath)
 {
-    writeJavaInt(filepath, static_cast<unsigned int>(formatVer));
-    writeOtherData(filepath, customGraphicsEnabled);
-    writeJavaShort(filepath, static_cast<unsigned int>(numBlocks));
+    std::ofstream dataOut;
+    dataOut.open(filepath, std::ios_base::binary | std::ios_base::out);
+    writeJavaInt(dataOut, formatVer);
+    writeOtherData(dataOut, customGraphicsEnabled);
+    writeJavaShort(dataOut, numBlocks);
     blockObj temp;
     for(int i = 0; i < numBlocks; i++)
     {
         temp = getBlockAtIndex(i);
-        writeOtherData(filepath, static_cast<unsigned char>(temp.objType));
-        writeJavaInt(filepath, static_cast<unsigned int>(temp.xPos));
-        writeJavaInt(filepath, static_cast<unsigned int>(temp.yPos));
+        writeOtherData(dataOut, temp.objType);
+        writeJavaInt(dataOut, temp.xPos);
+        writeJavaInt(dataOut, temp.yPos);
     }
-    writeJavaInt(filepath, static_cast<unsigned int>(endWallPos));
-    writeJavaInt(filepath, static_cast<unsigned int>(numBgSwitch));
+    writeJavaInt(dataOut, endWallPos);
+    writeJavaInt(dataOut, numBgSwitch);
     bgCon tempCon;
     for(int i = 0; i < numBgSwitch; i++)
     {
         tempCon = getBgConAtIndex(i);
-        writeJavaInt(filepath, static_cast<unsigned int>(tempCon.xPos));
-        writeJavaInt(filepath, static_cast<unsigned int>(tempCon.colorID));
+        writeJavaInt(dataOut, tempCon.xPos);
+        writeJavaInt(dataOut, tempCon.colorID);
     }
-    writeJavaInt(filepath, static_cast<unsigned int>(numGravitySwitch));
+    writeJavaInt(dataOut, numGravitySwitch);
     gravityChange tempGrav;
     for(int i = 0; i < numGravitySwitch; i++)
     {
         tempGrav = getGravityAtIndex(i);
-        writeJavaInt(filepath, static_cast<unsigned int>(tempGrav.xPos));
+        writeJavaInt(dataOut, tempGrav.xPos);
     }
-    writeJavaInt(filepath, static_cast<unsigned int>(numRisingBlocks));
+    writeJavaInt(dataOut, numRisingBlocks);
     risingBlocks tempRising;
     for(int i = 0; i < numRisingBlocks; i++)
     {
         tempRising = getRisingAtIndex(i);
-        writeJavaInt(filepath, static_cast<unsigned int>(tempRising.startX));
-        writeJavaInt(filepath, static_cast<unsigned int>(tempRising.endX));
+        writeJavaInt(dataOut, tempRising.startX);
+        writeJavaInt(dataOut, tempRising.endX);
     }
-    writeJavaInt(filepath, static_cast<unsigned int>(numFallingBlocks));
+    writeJavaInt(dataOut, numFallingBlocks);
     fallingBlocks tempFalling;
     for(int i = 0; i < numFallingBlocks; i++)
     {
         tempFalling = getFallingAtIndex(i);
-        writeJavaInt(filepath, static_cast<unsigned int>(tempFalling.startX));
-        writeJavaInt(filepath, static_cast<unsigned int>(tempFalling.startX));
+        writeJavaInt(dataOut, tempFalling.startX);
+        writeJavaInt(dataOut, tempFalling.startX);
     }
 }
 

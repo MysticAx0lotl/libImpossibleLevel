@@ -1,8 +1,8 @@
 #include "libImpossibleLevel.hpp"
 
-std::int main()
+int main()
 {
     levelObj leveldata("demo.lvl/level.dat");
-    //leveldata.writeDataToFile("test.dat");
+    leveldata.writeDataToFile("testOut.dat");
     return 0;
 }
