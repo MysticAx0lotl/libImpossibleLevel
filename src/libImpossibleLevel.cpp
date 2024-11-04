@@ -57,18 +57,23 @@ short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
     return result;
 }
 
-void writeJavaInt(const char* filepath, int sourceInt)
+void writeJavaInt(const char* filepath, unsigned int sourceInt)
 {
+    std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
+    datafile << static_cast<unsigned char>(_byteswap_uint32(sourceInt) & 0xff);
     return;
 }
 
-void writeJavaShort(const char* filepath, short sourceShort)
+void writeJavaShort(const char* filepath, unsigned short sourceShort)
 {
+    std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
+    datafile << static_cast<unsigned char>(_byteswap_ushort(sourceShort) & 0xff);
     return;
 }
 
 void writeOtherData(const char* filepath, unsigned char data)
 {
+    datafile << data;
     return;
 }
 
