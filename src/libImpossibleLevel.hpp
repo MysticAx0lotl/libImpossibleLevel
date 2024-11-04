@@ -47,6 +47,7 @@ struct fallingBlocks //but I don't want to merge them to keep true to the origin
 class levelObj
 {
     public:
+        levelObj();
         levelObj(char const*);
         void loadDataFromFile(char const*);
         void writeDataToFile(char const*);
@@ -84,7 +85,7 @@ class levelObj
         std::vector<gravityChange> *gravitySwitches = new std::vector<gravityChange>;
         std::vector<risingBlocks> *risingSections = new std::vector<risingBlocks>;
         std::vector<fallingBlocks> *fallingSections = new std::vector<fallingBlocks>;
-        int numBlocks;
+        short numBlocks;
         int numBgSwitch;
         int numGravitySwitch;
         int numRisingBlocks;

@@ -60,7 +60,7 @@ short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
 void writeJavaInt(const char* filepath, unsigned int sourceInt)
 {
     std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
-    datafile << static_cast<unsigned char>(_byteswap_uint32(sourceInt) & 0xff);
+    datafile << static_cast<unsigned char>(_byteswap_uint64(sourceInt) & 0xff);
     return;
 }
 
@@ -73,13 +73,14 @@ void writeJavaShort(const char* filepath, unsigned short sourceShort)
 
 void writeOtherData(const char* filepath, unsigned char data)
 {
+    std::ofstream datafile(filepath, std::ios_base::binary | std::ios_base::out);
     datafile << data;
     return;
 }
 
 levelObj::levelObj()
 {
-    cout << "ERROR: Must provide a filepath!";
+    std::cout << "ERROR: Must provide a filepath!";
 }
 
 levelObj::levelObj(char const* filename)
@@ -256,9 +257,49 @@ void levelObj::loadDataFromFile(char const* filepath)
 //very unfinished
 void levelObj::writeDataToFile(char const* filepath)
 {
-    writeJavaInt(filepath, formatVer);
+    writeJavaInt(filepath, static_cast<unsigned int>(formatVer));
     writeOtherData(filepath, customGraphicsEnabled);
-    writeJavaShort(filepath, blockObjs);
+    writeJavaShort(filepath, static_cast<unsigned int>(numBlocks));
+    blockObj temp;
+    for(int i = 0; i < numBlocks; i++)
+    {
+        temp = getBlockAtIndex(i);
+        writeOtherData(filepath, static_cast<unsigned char>(temp.objType));
+        writeJavaInt(filepath, static_cast<unsigned int>(temp.xPos));
+        writeJavaInt(filepath, static_cast<unsigned int>(temp.yPos));
+    }
+    writeJavaInt(filepath, static_cast<unsigned int>(endWallPos));
+    writeJavaInt(filepath, static_cast<unsigned int>(numBgSwitch));
+    bgCon tempCon;
+    for(int i = 0; i < numBgSwitch; i++)
+    {
+        tempCon = getBgConAtIndex(i);
+        writeJavaInt(filepath, static_cast<unsigned int>(tempCon.xPos));
+        writeJavaInt(filepath, static_cast<unsigned int>(tempCon.colorID));
+    }
+    writeJavaInt(filepath, static_cast<unsigned int>(numGravitySwitch));
+    gravityChange tempGrav;
+    for(int i = 0; i < numGravitySwitch; i++)
+    {
+        tempGrav = getGravityAtIndex(i);
+        writeJavaInt(filepath, static_cast<unsigned int>(tempGrav.xPos));
+    }
+    writeJavaInt(filepath, static_cast<unsigned int>(numRisingBlocks));
+    risingBlocks tempRising;
+    for(int i = 0; i < numRisingBlocks; i++)
+    {
+        tempRising = getRisingAtIndex(i);
+        writeJavaInt(filepath, static_cast<unsigned int>(tempRising.startX));
+        writeJavaInt(filepath, static_cast<unsigned int>(tempRising.endX));
+    }
+    writeJavaInt(filepath, static_cast<unsigned int>(numFallingBlocks));
+    fallingBlocks tempFalling;
+    for(int i = 0; i < numFallingBlocks; i++)
+    {
+        tempFalling = getFallingAtIndex(i);
+        writeJavaInt(filepath, static_cast<unsigned int>(tempFalling.startX));
+        writeJavaInt(filepath, static_cast<unsigned int>(tempFalling.startX));
+    }
 }
 
 int levelObj::getFormatVer()
