@@ -43,6 +43,19 @@ int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
     return result;
 }
 
+short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
+{
+    unsigned short bit1, bit2;
+    bit1 = static_cast<unsigned int>(file[startingOffset]);
+    bit2 = static_cast<unsigned int>(file[startingOffset + 1]);
+
+    bit1 = bit1 << 8;
+    //bit 2 doesn't get shifted
+
+    unsigned short resultU = bit1 | bit2;
+    short result = static_cast<short>(resultU);
+    return result;
+}
 
 void writeJavaInt(const char* filepath, int sourceInt)
 {
@@ -59,18 +72,9 @@ void writeOtherData(const char* filepath, unsigned char data)
     return;
 }
 
-short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
+levelObj::levelObj()
 {
-    unsigned short bit1, bit2;
-    bit1 = static_cast<unsigned int>(file[startingOffset]);
-    bit2 = static_cast<unsigned int>(file[startingOffset + 1]);
-
-    bit1 = bit1 << 8;
-    //bit 2 doesn't get shifted
-
-    unsigned short resultU = bit1 | bit2;
-    short result = static_cast<short>(resultU);
-    return result;
+    cout << "ERROR: Must provide a filepath!";
 }
 
 levelObj::levelObj(char const* filename)
@@ -244,6 +248,7 @@ void levelObj::loadDataFromFile(char const* filepath)
     std::cout << "Loaded entire level!" << std::endl;
 }
 
+//very unfinished
 void levelObj::writeDataToFile(char const* filepath)
 {
     writeJavaInt(filepath, formatVer);
