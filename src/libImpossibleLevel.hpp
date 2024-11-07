@@ -92,7 +92,27 @@ PUBLIC MEMBERS
 - getGravityAtIndex(int): returns the GravityChange at the given int if it exists, returns an empty GravityChange otherwise
 - getRisingAtIndex(int): returns the RisingBlocks at the given int if it exists, returns an empty RisingBlocks otherwise
 - getFallingAtIndex(int): returns the FallingBlocks at the given int if it exists, returns an empty FallingBlocks otherwise
+- getEndPos(): return the x position of the end wall as an int
+- getObjCount() through getFallingCount(): return the size of the corresponding vectors
+- addNewBlock(BlockObj) through addFallingBlocks(FallingBlocks): add the provided object to the corresponding vector, and increment the associated private member
+- setEndPos(int): set the position of the end wall to the given parameter
+- remove____AtIndex(int): removes the object at the given index from the appropriate vector, if the given index is in bounds
+- removeLast____(): removes the last entry from the appropriate vector, if the appropriate vector isn't empty
+- printAllInfo(): currently does nothing
 
+PRIVATE MEMBERS
+- blockObjs: pointer to a vector of BlockObj objects, stored in the heap
+- backgroundSwitches: pointer to a vector of BgCon objects, stored in the heap
+- gravitySwitches: pointer to a vector of GravityChange objects, stored in the heap
+- risingSections: pointer to a vector of RisingBlocks objects, stored in the heap
+- fallingSections: pointer to a vector of FallingBlocks objects, stored in the heap
+- numBlocks: size of blockObjs, stored as a short
+- numBgSwitch through numFallingBlocks: size of the associated vector, stored as an int
+- endWallPos: x position of the end of the level, stored as an int
+- customGraphicsEnabled: whether or not custom graphics are enabled for the level, stored as a bool
+- formatVer: the file format version, stored as an int
+- objNames: the human-readable name corresponding to each object ID, stored as an array of const chars
+- colorNames: the human-readable name corresponding to each color ID, stored as an array of const chars
 */
 class Level
 {

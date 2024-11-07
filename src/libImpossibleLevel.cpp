@@ -28,6 +28,9 @@ static std::vector<unsigned char> ReadAllBytes(char const* filename)
 //Java handles evereything in big-Endian
 //Since TIG's level editor is written in java, ints and shorts are written as big-Endian
 //They must be converted to little-Endian after being read to be useable here
+//This function takes an array of chars and a byte to start from. 
+//It bit-shifts the starting byte and the next three bytes, then joins them together into a single int
+//file = loaded file as a array of chars, startingOffset = the byte to start processing from
 int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
 {
     unsigned int bit1, bit2, bit3, bit4;
@@ -46,9 +49,9 @@ int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
     return result;
 }
 
-//Java handles evereything in big-Endian
-//Since TIG's level editor is written in java, ints and shorts are written as big-Endian
-//They must be converted to little-Endian after being read to be useable here
+//This function takes an array of chars and a byte to start from. 
+//It bit-shifts the starting byte and the next byte, then joins them together into a single short
+//file = loaded file as a array of chars, startingOffset = the byte to start processing from
 short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
 {
     unsigned short bit1, bit2;
@@ -112,36 +115,44 @@ Level::~Level()
 //Parse level data from the given filepath, called by constructor
 void Level::loadDataFromFile(char const* filepath)
 {
-    int currentByte = 0;
-    std::vector<unsigned char> temp = ReadAllBytes(filepath);
-    if (temp.size() == 0)
+    int currentByte = 0; //tracks the current byte in the file 
+    std::vector<unsigned char> *level = &ReadAllBytes(filepath); //load file from path, store in the heap
+    
+    //make sure we actually loaded data
+    if (level->size() == 0)
     {
         std::cout << "Loaded empty file, data will not be processed!" << std::endl;
     }
     else
     {
-        std::vector<unsigned char> *level; 
-        level = &temp;
+        //first four bytes in the file are the format version, stored as an int
         std::cout << "getting file format version" << std::endl;
         this->formatVer = readIntFromJava(*level, currentByte);
         currentByte += 4;
         std::cout << "Format version " << this->formatVer << std::endl;
+
+        //the next byte is a bool seeing if custom graphics are enabled
         std::cout << "Checking if special graphics are enabled" << std::endl;
         this->customGraphicsEnabled = static_cast<bool>(level->at(currentByte));
         if(this->customGraphicsEnabled)
         {
-            std::cout << "Custom graphics enabled" << std::endl;
+            std::cout << "Custom graphics enabled, this feature is undocumented, so the loader will likely break now" << std::endl;
         }
         currentByte += 1;
+
+        //the next two bytes are the number of blocks in the level, stored as a short
         std::cout << "Attempting to read block count" << std::endl;
         this->numBlocks = readShortFromJava(*level, currentByte);
         std::cout << "There are " << this->numBlocks << " blocks in the level" << std::endl;
         currentByte += 2;
-    
+
+        //One block uses nine bytes of data (bool + 2 ints = 1 + 2(4) = 9 bytes)
+        //the next (9 * numBlocks) bytes are the data for each block
         BlockObj *currentBlock = new BlockObj;
     
         for(int i = 0; i < this->numBlocks; i++)
         {
+
             currentBlock->objType = static_cast<int>(level->at(currentByte));
             std::cout << "The current block type is " << this->objNames[currentBlock->objType] << std::endl;
             currentByte++;
@@ -164,15 +175,20 @@ void Level::loadDataFromFile(char const* filepath)
         std::cout << "Loaded " << this->blockObjs->size() << " object(s)!" << std::endl;
         delete currentBlock;
     
+        //the next four bytes are the x position of the end of the level, stored as an int
         this->endWallPos = readIntFromJava(*level, currentByte);
         std::cout << "End wall is located at X position " << this->endWallPos << std::endl;
         currentByte += 4;
     
+        //the next four bytes are the number of color changes in the level, stored as an int
         std::cout << "Attempting to read color change count" << std::endl;
         this->numBgSwitch = readIntFromJava(*level, currentByte);
         std::cout << "There are " << this->numBgSwitch << " color triggers in the level" << std::endl;
         currentByte += 4;
     
+        //Assuming all background changes don't use custom graphics
+        //Each background change takes up 9 bytes (same math as before, 2 ints + 1 bool)
+        //Therefore the next (9 * numBgSwitch) bytes are background changes
         BgCon *currentBg = new BgCon;
     
         for(int i = 0; i < this->numBgSwitch; i++)
@@ -199,11 +215,14 @@ void Level::loadDataFromFile(char const* filepath)
         std::cout << "Loaded " << this->backgroundSwitches->size() << " color trigger(s)!" << std::endl;
         delete currentBg;
     
+        //The next 4 bytes are the number of gravity changes in the level, stored as an int
         std::cout << "Attempting to read gravity change count" << std::endl;
         this->numGravitySwitch = readIntFromJava(*level, currentByte);
         std::cout << "There are " << this->numGravitySwitch << " gravity changes in the level" << std::endl;
         currentByte += 4;
     
+        //Each gravity change only takes up 4 bytes (1 int = 4 bytes)
+        //Therefore, the next (4 * numGravitySwitch) bytes are gravity switch data
         GravityChange *currentGrav = new GravityChange;
     
         for(int i = 0; i < this->numGravitySwitch; i++)
@@ -223,11 +242,14 @@ void Level::loadDataFromFile(char const* filepath)
         std::cout << "Loaded " << this->gravitySwitches->size() << " gravity trigger(s)!" << std::endl;
         delete currentGrav;
     
+        //The next 4 bytes are the number of falling block fade effects, stored as an int
         std::cout << "Attempting to read falling block count" << std::endl;
         this->numFallingBlocks = readIntFromJava(*level, currentByte);
         std::cout << "There are " << this->numFallingBlocks << " falling blocks in the level" << std::endl;
         currentByte += 4;
     
+        //Each falling block object takes up 8 bytes (2 ints = 2 * 4 bytes = 8 bytes)
+        //Therefore the next (8 * numFallingBlocks) bytes are Falling Blocks data
         FallingBlocks *currentFalling = new FallingBlocks;
     
         for(int i = 0; i < this->numFallingBlocks; i++)
@@ -251,11 +273,14 @@ void Level::loadDataFromFile(char const* filepath)
         std::cout << "Loaded " << this->fallingSections->size() << " falling section(s)!" << std::endl;
         delete currentFalling;
     
+        //The next 4 bytes are the number of rising block fade effects, stored as an int
         std::cout << "Attempting to read rising block count" << std::endl;
         this->numRisingBlocks = readIntFromJava(*level, currentByte);
         std::cout << "There are " << numRisingBlocks << " rising blocks in the level" << std::endl;
         currentByte += 4;
-    
+
+        //Each rising block object takes up 8 bytes (2 ints = 2 * 4 bytes = 8 bytes)
+        //Therefore the next (8 * numRisingBlocks) bytes are Rising Blocks data
         RisingBlocks *currentRising = new RisingBlocks;
     
         for(int i = 0; i < this->numFallingBlocks; i++)
@@ -281,6 +306,7 @@ void Level::loadDataFromFile(char const* filepath)
     }
 
     std::cout << "Loaded entire level!" << std::endl;
+    delete level; //all data is now stored in the class, the raw level data is no longer needed
 }
 
 void Level::writeDataToFile(char const* filepath)
@@ -341,6 +367,7 @@ void Level::writeDataToFile(char const* filepath)
     }
 }
 
+//The following methods are all explained in the hpp file
 int Level::getFormatVer()
 {
     return this->formatVer;
@@ -482,6 +509,7 @@ void Level::setEndPos(int endPos)
     this->endWallPos = endPos;
 }
 
+//The if-else statements in the AtIndex methods make sure that the index is in range
 void Level::removeBlockAtIndex(int index)
 {
     if(index < this->numBlocks)
@@ -490,7 +518,8 @@ void Level::removeBlockAtIndex(int index)
         this->numBlocks--;
     }
 }
-       
+
+//The if-else statements in the removeLast methods make sure that the appropriate vectors contain data 
 void Level::removeLastBlock()
 {
     if(this->numBlocks > 0)
