@@ -1,27 +1,28 @@
 #include "libImpossibleLevel.hpp"
 
 //Source: https://codereview.stackexchange.com/a/22907
-//modified to convert to and then return an unsigned char vector instead of a signed one
-static std::vector<unsigned char> ReadAllBytes(char const* filename)
+//modified to convert to and then return an unsigned char vector on the heap instead of a signed one on the stack
+static std::vector<unsigned char>* ReadAllBytes(char const* filename)
 {
     std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
     if (pos == 0) {
-        return std::vector<unsigned char>{};
+        return new std::vector<unsigned char>;
     }
 
-    std::vector<char> result(pos);
+    std::vector<char>* result = new std::vector<char>(pos);
 
     ifs.seekg(0, std::ios::beg);
-    ifs.read(&result[0], pos);
+    ifs.read(&result->at(0), pos);
 
-    std::vector<unsigned char> returnVal(pos);
-    for(int i = 0; i < result.size(); i++)
+    std::vector<unsigned char>* returnVal = new std::vector<unsigned char>(pos);
+    for(int i = 0; i < result->size(); i++)
     {
-        returnVal[i] = static_cast<unsigned char>(result[i]);
+        returnVal->at(i) = static_cast<unsigned char>(result->at(i));
     }
 
+    delete result;
     return returnVal;
 }
 
@@ -116,7 +117,7 @@ Level::~Level()
 void Level::loadDataFromFile(char const* filepath)
 {
     int currentByte = 0; //tracks the current byte in the file 
-    std::vector<unsigned char> *level = &ReadAllBytes(filepath); //load file from path, store in the heap
+    std::vector<unsigned char> *level = ReadAllBytes(filepath); //load file from path, store in the heap
     
     //make sure we actually loaded data
     if (level->size() == 0)
@@ -525,7 +526,7 @@ void Level::removeLastBlock()
     if(this->numBlocks > 0)
     {
         this->blockObjs->pop_back();
-        this-numBlocks--;
+        this->numBlocks--;
     }
 }
 
