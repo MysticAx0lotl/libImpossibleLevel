@@ -99,6 +99,7 @@ Level::Level(char const* filename)
     this->loadDataFromFile(filename);
 }
 
+//Destructor that removes all data from the heap
 Level::~Level()
 {
     delete this->blockObjs;
@@ -108,7 +109,7 @@ Level::~Level()
     delete this->fallingSections;
 }
 
-//push back command: vector.push_back(&type);
+//Parse level data from the given filepath, called by constructor
 void Level::loadDataFromFile(char const* filepath)
 {
     int currentByte = 0;
@@ -347,28 +348,68 @@ int Level::getFormatVer()
 
 BlockObj Level::getBlockAtIndex(int index)
 {
-    return this->blockObjs->at(index);
+    if(index < this->numBlocks)
+    {
+        return this->blockObjs->at(index);
+    }
+    else
+    {
+        BlockObj nullObj = {0, 0, 0, 0};
+        return nullObj;
+    }
 }
 
 BgCon Level::getBgConAtIndex(int index)
 {
-    return this->backgroundSwitches->at(index);
+    if(index < this->numBgSwitch)
+    {
+        return this->backgroundSwitches->at(index);
+    }
+    else
+    {
+        BgCon nullObj = {0, 0, "null", false, "null", 0};
+        return nullObj;
+    }
 
 }
 
 GravityChange Level::getGravityAtIndex(int index)
 {
-    return this->gravitySwitches->at(index);
+    if(index < this->numGravitySwitch)
+    {
+        return this->gravitySwitches->at(index);
+    }
+    else
+    {
+        GravityChange nullObj = {0, 0};
+        return nullObj;
+    }
 }
 
 RisingBlocks Level::getRisingAtIndex(int index)
 {
-    return this->risingSections->at(index);
+    if(index < this->numRisingBlocks)
+    {
+        return this->risingSections->at(index);
+    }
+    else
+    {
+        RisingBlocks nullObj = {0, 0, 0};
+        return nullObj;
+    }
 }
 
 FallingBlocks Level::getFallingAtIndex(int index)
 {
-    return this->fallingSections->at(index);
+    if(index < this->numFallingBlocks)
+    {
+        return this->fallingSections->at(index);
+    }
+    else
+    {
+        FallingBlocks nullObj = {0, 0, 0};
+        return nullObj;
+    }
 }
 
 int Level::getEndPos()
@@ -443,52 +484,92 @@ void Level::setEndPos(int endPos)
 
 void Level::removeBlockAtIndex(int index)
 {
-    this->blockObjs->erase(this->blockObjs->begin() + index);
+    if(index < this->numBlocks)
+    {
+        this->blockObjs->erase(this->blockObjs->begin() + index);
+        this->numBlocks--;
+    }
 }
        
 void Level::removeLastBlock()
 {
-    this->blockObjs->pop_back();
+    if(this->numBlocks > 0)
+    {
+        this->blockObjs->pop_back();
+        this-numBlocks--;
+    }
 }
 
 void Level::removeBgConAtIndex(int index)
 {
-    this->backgroundSwitches->erase(this->backgroundSwitches->begin() + index);
+    if(index < this->numBgSwitch)
+    {
+        this->backgroundSwitches->erase(this->backgroundSwitches->begin() + index);
+        this->numBgSwitch--;
+    }
 }
 
 void Level::removeLastBgCon()
 {
-    this->backgroundSwitches->pop_back();
+    if(this->numBgSwitch > 0)
+    {
+        this->backgroundSwitches->pop_back();
+        this->numBgSwitch--;
+    }
 }
 
 void Level::removeGravitySwitchAtIndex(int index)
 {
-    this->gravitySwitches->erase(this->gravitySwitches->begin() + index);
+    if(index < this->numGravitySwitch)
+    {
+        this->gravitySwitches->erase(this->gravitySwitches->begin() + index);
+        this->numGravitySwitch--;
+    }
 }
 
 void Level::removeLastGravitySwitch()
 {
-    this->gravitySwitches->pop_back();
+    if(this->numGravitySwitch > 0)
+    {
+        this->gravitySwitches->pop_back();
+        this->numGravitySwitch--;
+    }
 }
 
 void Level::removeRisingBlocksAtIndex(int index)
 {
-    this->risingSections->erase(this->risingSections->begin() + index);
+    if(index < this->numRisingBlocks)
+    {
+        this->risingSections->erase(this->risingSections->begin() + index);
+        this->numRisingBlocks--;
+    }
 }
 
 void Level::removeLastRisingBlocks()
 {
-    this->risingSections->pop_back();
+    if(this->numRisingBlocks > 0)
+    {
+        this->risingSections->pop_back();
+        this->numRisingBlocks--;
+    }
 }
 
 void Level::removeFallingBlocksAtIndex(int index)
 {
-    this->fallingSections->erase(this->fallingSections->begin() + index);
+    if(index < this->numFallingBlocks)
+    {
+        this->fallingSections->erase(this->fallingSections->begin() + index);
+        this->numFallingBlocks--;
+    }
 }
 
 void Level::removeLastFallingBlocks()
 {
-    this->fallingSections->pop_back();
+    if(this->numFallingBlocks > 0)
+    {
+        this->fallingSections->pop_back();
+        this->numFallingBlocks--;
+    }
 }
 
 void Level::printAllInfo()
