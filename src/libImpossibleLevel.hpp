@@ -6,17 +6,30 @@
 #include <iostream>
 #include <vector>
 
-//using namespace std;
-
-struct blockObj
+/*
+BlockObj: short for "block object"
+xPos = the object's x position in raw coordinates (divide by 30 to get its grid space)
+yPos = the object's y position in raw coordinates
+objType = the object's type ID (00 for a block, 01 for a spike, 02 for a pit)
+indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
+*/
+struct BlockObj
 {
     int xPos;
     int yPos;
     int objType;
-    int indexInVec; //used for vectors specific to this library
+    int indexInVec;
 };
 
-struct bgCon //background switcher
+/*
+BgCon: short for "background controller", i.e. the invisible objects that change the color or texture of the background
+xPos = the object's x position in raw coordinates (divide by 30 to get its grid space)
+colorId = the ID of the background color that will be used when this object is passed ()
+customGraphics = the editor's seemingly-unused ability to load an actual texture image instead of using a color
+customFile = the also unused UTF-8 string pointing to a texture
+indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
+*/
+struct BgCon
 {
     int xPos;
     int colorID;
@@ -26,41 +39,77 @@ struct bgCon //background switcher
     int indexInVec;
 };
 
-struct gravityChange
+/*
+GravityChange: the object that flips the level upside-down (only used in Chaoz Fantasy, impossible to place in the editor)
+xPos = the object's x position in raw coordinates (divide by 30 to get its grid space)
+indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
+*/
+struct GravityChange
 {
     int xPos;
     int indexInVec;
 };
 
-struct risingBlocks //this and fallingBlocks could be merged into a single struct
+/*
+RisingBlocks: the object that enables the fade effect where blocks will rise from the ground on the right side of the screen
+startX = the x positon where the effect will be enabled
+endX = the x position where the effect will be disabled
+indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
+Note: this and fallingBlocks could be merged into a single struct, but I don't want to merge them to keep true to the original code
+*/
+struct RisingBlocks
 {
     int startX;
     int endX;
     int indexInVec;
 };
 
-struct fallingBlocks //but I don't want to merge them to keep true to the original code
+/*
+FallingBlocks: the object that enables the fade effect where blocks will fall to the ground on the left side of the screen
+startX = the x positon where the effect will be enabled
+endX = the x position where the effect will be disabled
+indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
+*/
+struct FallingBlocks
 {
     int startX;
     int endX;
     int indexInVec;
 };
 
-class levelObj
+/*
+The class that holds the actual level data
+
+PUBLIC MEMBERS
+- Level(): failsafe for if no parameters are given
+- Level(char const*): call loadDataFromFile and pass its parameter
+- ~Level(): deconstructor
+- loadDataFromFile(char const*): load level data from path given by the parameter
+- writeDataToFile(char const*): write data to path given by parameter
+- getFormatVer(): get the file format version, returns an int
+- getBlockAtIndex(int): returns the BlockObj at the given int if it exists, returns an empty BlockObj otherwise
+- getBgConAtIndex(int): returns the BgCon at the given int if it exists, returns an empty BgCon otherwise
+- getGravityAtIndex(int): returns the GravityChange at the given int if it exists, returns an empty GravityChange otherwise
+- getRisingAtIndex(int): returns the RisingBlocks at the given int if it exists, returns an empty RisingBlocks otherwise
+- getFallingAtIndex(int): returns the FallingBlocks at the given int if it exists, returns an empty FallingBlocks otherwise
+
+*/
+class Level
 {
     public:
-        levelObj();
-        levelObj(char const*);
+        Level();
+        Level(char const*);
+        ~Level();
         void loadDataFromFile(char const*);
         void writeDataToFile(char const*);
 
         //get methods
         int getFormatVer();
-        blockObj getBlockAtIndex(int);
-        bgCon getBgConAtIndex(int);
-        gravityChange getGravityAtIndex(int);
-        risingBlocks getRisingAtIndex(int);
-        fallingBlocks getFallingAtIndex(int);
+        BlockObj getBlockAtIndex(int);
+        BgCon getBgConAtIndex(int);
+        GravityChange getGravityAtIndex(int);
+        RisingBlocks getRisingAtIndex(int);
+        FallingBlocks getFallingAtIndex(int);
         int getEndPos();
         int getObjCount();
         int getBgCount();
@@ -69,24 +118,33 @@ class levelObj
         int getFallingCount();
 
         //set methods
-        void addNewBlock(blockObj);
-        void addBgCon(bgCon);
-        void addGravitySwitch(gravityChange);
-        void addRisingBlocks(risingBlocks);
-        void addFallingBlocks(fallingBlocks);
+        void addNewBlock(BlockObj);
+        void addBgCon(BgCon);
+        void addGravitySwitch(GravityChange);
+        void addRisingBlocks(RisingBlocks);
+        void addFallingBlocks(FallingBlocks);
         void setEndPos(int);
 
         //removal methods
-
+        void removeBlockAtIndex(int);
+        void removeLastBlock();
+        void removeBgConAtIndex(int);
+        void removeLastBgCon();
+        void removeGravitySwitchAtIndex(int);
+        void removeLastGravitySwitch();
+        void removeRisingBlocksAtIndex(int);
+        void removeLastRisingBlocks();
+        void removeFallingBlocksAtIndex(int);
+        void removeLastFallingBlocks();
 
         void printAllInfo();
 
     private:
-        std::vector<blockObj> *blockObjs = new std::vector<blockObj>;
-        std::vector<bgCon> *backgroundSwitches = new std::vector<bgCon>;
-        std::vector<gravityChange> *gravitySwitches = new std::vector<gravityChange>;
-        std::vector<risingBlocks> *risingSections = new std::vector<risingBlocks>;
-        std::vector<fallingBlocks> *fallingSections = new std::vector<fallingBlocks>;
+        std::vector<BlockObj> *blockObjs = new std::vector<BlockObj>;
+        std::vector<BgCon> *backgroundSwitches = new std::vector<BgCon>;
+        std::vector<GravityChange> *gravitySwitches = new std::vector<GravityChange>;
+        std::vector<RisingBlocks> *risingSections = new std::vector<RisingBlocks>;
+        std::vector<FallingBlocks> *fallingSections = new std::vector<FallingBlocks>;
         short numBlocks;
         int numBgSwitch;
         int numGravitySwitch;

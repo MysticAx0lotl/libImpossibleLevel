@@ -11,7 +11,7 @@ static std::vector<unsigned char> ReadAllBytes(char const* filename)
         return std::vector<unsigned char>{};
     }
 
-    std::vector<char>  result(pos);
+    std::vector<char> result(pos);
 
     ifs.seekg(0, std::ios::beg);
     ifs.read(&result[0], pos);
@@ -74,24 +74,33 @@ void writeOtherData(std::ofstream& datafile, unsigned char data)
     datafile.write(reinterpret_cast<const char*>(&data), sizeof(data));
 }
 
-levelObj::levelObj()
+Level::Level()
 {
     std::cout << "ERROR: Must provide a filepath!";
 }
 
-levelObj::levelObj(char const* filename)
+Level::Level(char const* filename)
 {
     this->loadDataFromFile(filename);
 }
 
+Level::~Level()
+{
+    delete blockObjs;
+    delete backgroundSwitches;
+    delete gravitySwitches;
+    delete risingSections;
+    delete fallingSections;
+}
+
 //push back command: vector.push_back(&type);
-void levelObj::loadDataFromFile(char const* filepath)
+void Level::loadDataFromFile(char const* filepath)
 {
     int currentByte = 0;
     std::vector<unsigned char> temp = ReadAllBytes(filepath);
-    if (sizeOf(temp) == 0)
+    if (temp.size() == 0)
     {
-        cout << "Loaded empty file, data will not be processed!" << endl;
+        std::cout << "Loaded empty file, data will not be processed!" << std::endl;
     }
     else
     {
@@ -113,7 +122,7 @@ void levelObj::loadDataFromFile(char const* filepath)
         std::cout << "There are " << numBlocks << " blocks in the level" << std::endl;
         currentByte += 2;
     
-        blockObj *currentBlock = new blockObj;
+        BlockObj *currentBlock = new BlockObj;
     
         for(int i = 0; i < numBlocks; i++)
         {
@@ -148,7 +157,7 @@ void levelObj::loadDataFromFile(char const* filepath)
         std::cout << "There are " << numBgSwitch << " color triggers in the level" << std::endl;
         currentByte += 4;
     
-        bgCon *currentBg = new bgCon;
+        BgCon *currentBg = new BgCon;
     
         for(int i = 0; i < numBgSwitch; i++)
         {
@@ -179,7 +188,7 @@ void levelObj::loadDataFromFile(char const* filepath)
         std::cout << "There are " << numGravitySwitch << " gravity changes in the level" << std::endl;
         currentByte += 4;
     
-        gravityChange *currentGrav = new gravityChange;
+        GravityChange *currentGrav = new GravityChange;
     
         for(int i = 0; i < numGravitySwitch; i++)
         {
@@ -203,7 +212,7 @@ void levelObj::loadDataFromFile(char const* filepath)
         std::cout << "There are " << numFallingBlocks << " falling blocks in the level" << std::endl;
         currentByte += 4;
     
-        fallingBlocks *currentFalling = new fallingBlocks;
+        FallingBlocks *currentFalling = new FallingBlocks;
     
         for(int i = 0; i < numFallingBlocks; i++)
         {
@@ -231,7 +240,7 @@ void levelObj::loadDataFromFile(char const* filepath)
         std::cout << "There are " << numRisingBlocks << " rising blocks in the level" << std::endl;
         currentByte += 4;
     
-        risingBlocks *currentRising = new risingBlocks;
+        RisingBlocks *currentRising = new RisingBlocks;
     
         for(int i = 0; i < numFallingBlocks; i++)
         {
@@ -258,15 +267,14 @@ void levelObj::loadDataFromFile(char const* filepath)
     std::cout << "Loaded entire level!" << std::endl;
 }
 
-//very unfinished
-void levelObj::writeDataToFile(char const* filepath)
+void Level::writeDataToFile(char const* filepath)
 {
     std::ofstream dataOut;
     dataOut.open(filepath, std::ios_base::binary | std::ios_base::out);
     writeJavaInt(dataOut, formatVer);
     writeOtherData(dataOut, customGraphicsEnabled);
     writeJavaShort(dataOut, numBlocks);
-    blockObj temp;
+    BlockObj temp;
     for(int i = 0; i < numBlocks; i++)
     {
         temp = getBlockAtIndex(i);
@@ -276,7 +284,7 @@ void levelObj::writeDataToFile(char const* filepath)
     }
     writeJavaInt(dataOut, endWallPos);
     writeJavaInt(dataOut, numBgSwitch);
-    bgCon tempCon;
+    BgCon tempCon;
     for(int i = 0; i < numBgSwitch; i++)
     {
         tempCon = getBgConAtIndex(i);
@@ -293,14 +301,14 @@ void levelObj::writeDataToFile(char const* filepath)
         }
     }
     writeJavaInt(dataOut, numGravitySwitch);
-    gravityChange tempGrav;
+    GravityChange tempGrav;
     for(int i = 0; i < numGravitySwitch; i++)
     {
         tempGrav = getGravityAtIndex(i);
         writeJavaInt(dataOut, tempGrav.xPos);
     }
     writeJavaInt(dataOut, numRisingBlocks);
-    risingBlocks tempRising;
+    RisingBlocks tempRising;
     for(int i = 0; i < numRisingBlocks; i++)
     {
         tempRising = getRisingAtIndex(i);
@@ -308,7 +316,7 @@ void levelObj::writeDataToFile(char const* filepath)
         writeJavaInt(dataOut, tempRising.endX);
     }
     writeJavaInt(dataOut, numFallingBlocks);
-    fallingBlocks tempFalling;
+    FallingBlocks tempFalling;
     for(int i = 0; i < numFallingBlocks; i++)
     {
         tempFalling = getFallingAtIndex(i);
@@ -317,108 +325,158 @@ void levelObj::writeDataToFile(char const* filepath)
     }
 }
 
-int levelObj::getFormatVer()
+int Level::getFormatVer()
 {
     return formatVer;
 }
 
-blockObj levelObj::getBlockAtIndex(int index)
+BlockObj Level::getBlockAtIndex(int index)
 {
     return blockObjs->at(index);
 }
 
-bgCon levelObj::getBgConAtIndex(int index)
+BgCon Level::getBgConAtIndex(int index)
 {
     return backgroundSwitches->at(index);
 
 }
 
-gravityChange levelObj::getGravityAtIndex(int index)
+GravityChange Level::getGravityAtIndex(int index)
 {
     return gravitySwitches->at(index);
 }
 
-risingBlocks levelObj::getRisingAtIndex(int index)
+RisingBlocks Level::getRisingAtIndex(int index)
 {
     return risingSections->at(index);
 }
 
-fallingBlocks levelObj::getFallingAtIndex(int index)
+FallingBlocks Level::getFallingAtIndex(int index)
 {
     return fallingSections->at(index);
 }
 
-int levelObj::getEndPos()
+int Level::getEndPos()
 {
     return endWallPos;
 }
 
-int levelObj::getObjCount()
+int Level::getObjCount()
 {
     return numBlocks;
 }
 
-int levelObj::getBgCount()
+int Level::getBgCount()
 {
     return numBgSwitch;
 }
 
-int levelObj::getGravityCount()
+int Level::getGravityCount()
 {
     return numGravitySwitch;
 }
 
-int levelObj::getRisingCount()
+int Level::getRisingCount()
 {
     return numRisingBlocks;
 }
 
-int levelObj::getFallingCount()
+int Level::getFallingCount()
 {
     return numFallingBlocks;
 }
 
-void levelObj::addNewBlock(blockObj toAdd)
+void Level::addNewBlock(BlockObj toAdd)
 {
     toAdd.indexInVec = numBlocks;
     numBlocks++;
     blockObjs->push_back(toAdd);
 }
 
-void levelObj::addBgCon(bgCon toAdd)
+void Level::addBgCon(BgCon toAdd)
 {
     toAdd.indexInVec = numBgSwitch;
     numBgSwitch++;
     backgroundSwitches->push_back(toAdd);
 }
 
-void levelObj::addGravitySwitch(gravityChange toAdd)
+void Level::addGravitySwitch(GravityChange toAdd)
 {
     toAdd.indexInVec = numGravitySwitch;
     numGravitySwitch++;
     gravitySwitches->push_back(toAdd);
 }
 
-void levelObj::addRisingBlocks(risingBlocks toAdd)
+void Level::addRisingBlocks(RisingBlocks toAdd)
 {
     toAdd.indexInVec = numRisingBlocks;
     numRisingBlocks++;
     risingSections->push_back(toAdd);
 }
 
-void levelObj::addFallingBlocks(fallingBlocks toAdd)
+void Level::addFallingBlocks(FallingBlocks toAdd)
 {
     toAdd.indexInVec = numFallingBlocks;
     numFallingBlocks++;
     fallingSections->push_back(toAdd);
 }
 
-void levelObj::setEndPos(int endPos)
+void Level::setEndPos(int endPos)
 {
     endWallPos = endPos;
 }
 
-void levelObj::printAllInfo()
+void Level::removeBlockAtIndex(int index)
+{
+
+}
+       
+void Level::removeLastBlock()
+{
+
+}
+
+void Level::removeBgConAtIndex(int index)
+{
+
+}
+
+void Level::removeLastBgCon()
+{
+
+}
+
+void Level::removeGravitySwitchAtIndex(int index)
+{
+
+}
+
+void Level::removeLastGravitySwitch()
+{
+
+}
+
+void Level::removeRisingBlocksAtIndex(int index)
+{
+
+}
+
+void Level::removeLastRisingBlocks()
+{
+
+}
+
+void Level::removeFallingBlocksAtIndex(int index)
+{
+
+}
+
+void Level::removeLastFallingBlocks()
+{
+
+}
+
+void Level::printAllInfo()
 {
 
 }
