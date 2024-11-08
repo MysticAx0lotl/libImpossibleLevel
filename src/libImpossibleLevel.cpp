@@ -25,6 +25,9 @@ static std::vector<unsigned char> ReadAllBytes(char const* filename)
     return returnVal;
 }
 
+//Java handles evereything in big-Endian
+//Since TIG's level editor is written in java, ints and shorts are written as big-Endian
+//They must be converted to little-Endian after being read to be useable here
 int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
 {
     unsigned int bit1, bit2, bit3, bit4;
@@ -43,6 +46,9 @@ int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
     return result;
 }
 
+//Java handles evereything in big-Endian
+//Since TIG's level editor is written in java, ints and shorts are written as big-Endian
+//They must be converted to little-Endian after being read to be useable here
 short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
 {
     unsigned short bit1, bit2;
@@ -57,28 +63,37 @@ short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
     return result;
 }
 
+//Java handles evereything in big-Endian
+//Since TIG's level editor is written in java, ints and shorts are read as big-Endian
+//They must be converted to little-Endian after being written to be accepted by the game
 void writeJavaInt(std::ofstream& datafile, int sourceInt)
 {
     unsigned int swapSource = __builtin_bswap32(static_cast<unsigned int>(sourceInt));
     datafile.write(reinterpret_cast<const char*>(&swapSource), sizeof(swapSource));
 }
 
+//Java handles evereything in big-Endian
+//Since TIG's level editor is written in java, ints and shorts are read as big-Endian
+//They must be converted to little-Endian after being written to be accepted by the game
 void writeJavaShort(std::ofstream& datafile, short sourceShort)
 {
     unsigned short swapSource = static_cast<unsigned short>((sourceShort >> 8) | (sourceShort << 8));
     datafile.write(reinterpret_cast<const char*>(&swapSource), sizeof(swapSource));
 }
 
+//Endianess doesn't matter for bools or char arrays, this function handles exporting those
 void writeOtherData(std::ofstream& datafile, unsigned char data)
 {
     datafile.write(reinterpret_cast<const char*>(&data), sizeof(data));
 }
 
+//Constructor that throws an error if no filepath is given
 Level::Level()
 {
     std::cout << "ERROR: Must provide a filepath!";
 }
 
+//Constructor that calls loadDataFromFile
 Level::Level(char const* filename)
 {
     this->loadDataFromFile(filename);
@@ -86,11 +101,11 @@ Level::Level(char const* filename)
 
 Level::~Level()
 {
-    delete blockObjs;
-    delete backgroundSwitches;
-    delete gravitySwitches;
-    delete risingSections;
-    delete fallingSections;
+    delete this->blockObjs;
+    delete this->backgroundSwitches;
+    delete this->gravitySwitches;
+    delete this->risingSections;
+    delete this->fallingSections;
 }
 
 //push back command: vector.push_back(&type);
@@ -107,27 +122,27 @@ void Level::loadDataFromFile(char const* filepath)
         std::vector<unsigned char> *level; 
         level = &temp;
         std::cout << "getting file format version" << std::endl;
-        formatVer = readIntFromJava(*level, currentByte);
+        this->formatVer = readIntFromJava(*level, currentByte);
         currentByte += 4;
-        std::cout << "Format version " << formatVer << std::endl;
+        std::cout << "Format version " << this->formatVer << std::endl;
         std::cout << "Checking if special graphics are enabled" << std::endl;
-        customGraphicsEnabled = static_cast<bool>(level->at(currentByte));
-        if(customGraphicsEnabled)
+        this->customGraphicsEnabled = static_cast<bool>(level->at(currentByte));
+        if(this->customGraphicsEnabled)
         {
             std::cout << "Custom graphics enabled" << std::endl;
         }
         currentByte += 1;
         std::cout << "Attempting to read block count" << std::endl;
-        numBlocks = readShortFromJava(*level, currentByte);
-        std::cout << "There are " << numBlocks << " blocks in the level" << std::endl;
+        this->numBlocks = readShortFromJava(*level, currentByte);
+        std::cout << "There are " << this->numBlocks << " blocks in the level" << std::endl;
         currentByte += 2;
     
         BlockObj *currentBlock = new BlockObj;
     
-        for(int i = 0; i < numBlocks; i++)
+        for(int i = 0; i < this->numBlocks; i++)
         {
             currentBlock->objType = static_cast<int>(level->at(currentByte));
-            std::cout << "The current block type is " << objNames[currentBlock->objType] << std::endl;
+            std::cout << "The current block type is " << this->objNames[currentBlock->objType] << std::endl;
             currentByte++;
     
             currentBlock->xPos = readIntFromJava(*level, currentByte);
@@ -140,26 +155,26 @@ void Level::loadDataFromFile(char const* filepath)
     
             currentBlock->indexInVec = i;
             std::cout << "This block can be found at index " << currentBlock->indexInVec << std::endl;
-            blockObjs->push_back(*currentBlock);
+            this->blockObjs->push_back(*currentBlock);
     
             std::cout << "Loaded object successfully!" << std::endl;
         }
     
-        std::cout << "Loaded " << blockObjs->size() << " object(s)!" << std::endl;
+        std::cout << "Loaded " << this->blockObjs->size() << " object(s)!" << std::endl;
         delete currentBlock;
     
-        endWallPos = readIntFromJava(*level, currentByte);
-        std::cout << "End wall is located at X position " << endWallPos << std::endl;
+        this->endWallPos = readIntFromJava(*level, currentByte);
+        std::cout << "End wall is located at X position " << this->endWallPos << std::endl;
         currentByte += 4;
     
         std::cout << "Attempting to read color change count" << std::endl;
-        numBgSwitch = readIntFromJava(*level, currentByte);
-        std::cout << "There are " << numBgSwitch << " color triggers in the level" << std::endl;
+        this->numBgSwitch = readIntFromJava(*level, currentByte);
+        std::cout << "There are " << this->numBgSwitch << " color triggers in the level" << std::endl;
         currentByte += 4;
     
         BgCon *currentBg = new BgCon;
     
-        for(int i = 0; i < numBgSwitch; i++)
+        for(int i = 0; i < this->numBgSwitch; i++)
         {
             currentBg->xPos = readIntFromJava(*level, currentByte);
             std::cout << "The current color trigger's xpos is " << currentBg->xPos << std::endl;
@@ -169,28 +184,28 @@ void Level::loadDataFromFile(char const* filepath)
             currentByte++; //WILL BREAK HERE IF CUSTOM GRAPHICS ARE ENABLED FOR SOME REASON
     
             currentBg->colorID = readIntFromJava(*level, currentByte);
-            std::cout << "The current color type is " << colorNames[currentBg->colorID] << std::endl;
+            std::cout << "The current color type is " << this->colorNames[currentBg->colorID] << std::endl;
             currentByte += 4;
     
             currentBg->indexInVec = i;
     
             std::cout << "This color trigger can be found at index " << currentBg->indexInVec << std::endl;
-            backgroundSwitches->push_back(*currentBg);
+            this->backgroundSwitches->push_back(*currentBg);
     
             std::cout << "Loaded color trigger successfully!" << std::endl;
         }
     
-        std::cout << "Loaded " << backgroundSwitches->size() << " color trigger(s)!" << std::endl;
+        std::cout << "Loaded " << this->backgroundSwitches->size() << " color trigger(s)!" << std::endl;
         delete currentBg;
     
         std::cout << "Attempting to read gravity change count" << std::endl;
-        numGravitySwitch = readIntFromJava(*level, currentByte);
-        std::cout << "There are " << numGravitySwitch << " gravity changes in the level" << std::endl;
+        this->numGravitySwitch = readIntFromJava(*level, currentByte);
+        std::cout << "There are " << this->numGravitySwitch << " gravity changes in the level" << std::endl;
         currentByte += 4;
     
         GravityChange *currentGrav = new GravityChange;
     
-        for(int i = 0; i < numGravitySwitch; i++)
+        for(int i = 0; i < this->numGravitySwitch; i++)
         {
             currentGrav->xPos = readIntFromJava(*level, currentByte);
             std::cout << "The current gravity trigger's xpos is " << currentGrav->xPos << std::endl;
@@ -199,22 +214,22 @@ void Level::loadDataFromFile(char const* filepath)
             currentGrav->indexInVec = i;
     
             std::cout << "This gravity trigger can be found at index " << currentGrav->indexInVec << std::endl;
-            gravitySwitches->push_back(*currentGrav);
+            this->gravitySwitches->push_back(*currentGrav);
     
             std::cout << "Loaded gravity trigger successfully!" << std::endl;
         }
     
-        std::cout << "Loaded " << gravitySwitches->size() << " gravity trigger(s)!" << std::endl;
+        std::cout << "Loaded " << this->gravitySwitches->size() << " gravity trigger(s)!" << std::endl;
         delete currentGrav;
     
         std::cout << "Attempting to read falling block count" << std::endl;
-        numFallingBlocks = readIntFromJava(*level, currentByte);
-        std::cout << "There are " << numFallingBlocks << " falling blocks in the level" << std::endl;
+        this->numFallingBlocks = readIntFromJava(*level, currentByte);
+        std::cout << "There are " << this->numFallingBlocks << " falling blocks in the level" << std::endl;
         currentByte += 4;
     
         FallingBlocks *currentFalling = new FallingBlocks;
     
-        for(int i = 0; i < numFallingBlocks; i++)
+        for(int i = 0; i < this->numFallingBlocks; i++)
         {
             currentFalling->startX = readIntFromJava(*level, currentByte);
             std::cout << "The current falling block startX is " << currentFalling->startX << std::endl;
@@ -227,22 +242,22 @@ void Level::loadDataFromFile(char const* filepath)
             currentFalling->indexInVec = i;
     
             std::cout << "This falling block section can be found at index " << currentFalling->indexInVec << std::endl;
-            fallingSections->push_back(*currentFalling);
+            this->fallingSections->push_back(*currentFalling);
     
             std::cout << "Loaded falling block section successfully!" << std::endl;
         }
     
-        std::cout << "Loaded " << fallingSections->size() << " falling section(s)!" << std::endl;
+        std::cout << "Loaded " << this->fallingSections->size() << " falling section(s)!" << std::endl;
         delete currentFalling;
     
         std::cout << "Attempting to read rising block count" << std::endl;
-        numRisingBlocks = readIntFromJava(*level, currentByte);
+        this->numRisingBlocks = readIntFromJava(*level, currentByte);
         std::cout << "There are " << numRisingBlocks << " rising blocks in the level" << std::endl;
         currentByte += 4;
     
         RisingBlocks *currentRising = new RisingBlocks;
     
-        for(int i = 0; i < numFallingBlocks; i++)
+        for(int i = 0; i < this->numFallingBlocks; i++)
         {
             currentRising->startX = readIntFromJava(*level, currentByte);
             std::cout << "The current rising block startX is " << currentRising->startX << std::endl;
@@ -255,12 +270,12 @@ void Level::loadDataFromFile(char const* filepath)
             currentRising->indexInVec = i;
     
             std::cout << "This rising block section can be found at index " << currentRising->indexInVec << std::endl;
-            risingSections->push_back(*currentRising);
+            this->risingSections->push_back(*currentRising);
     
             std::cout << "Loaded rising block section successfully!" << std::endl;
         }
     
-        std::cout << "Loaded " << risingSections->size() << " rising section(s)!" << std::endl;
+        std::cout << "Loaded " << this->risingSections->size() << " rising section(s)!" << std::endl;
         delete currentRising;
     }
 
@@ -271,13 +286,13 @@ void Level::writeDataToFile(char const* filepath)
 {
     std::ofstream dataOut;
     dataOut.open(filepath, std::ios_base::binary | std::ios_base::out);
-    writeJavaInt(dataOut, formatVer);
-    writeOtherData(dataOut, customGraphicsEnabled);
-    writeJavaShort(dataOut, numBlocks);
+    writeJavaInt(dataOut, this->formatVer);
+    writeOtherData(dataOut, this->customGraphicsEnabled);
+    writeJavaShort(dataOut, this->numBlocks);
     BlockObj temp;
-    for(int i = 0; i < numBlocks; i++)
+    for(int i = 0; i < this->numBlocks; i++)
     {
-        temp = getBlockAtIndex(i);
+        temp = this->getBlockAtIndex(i);
         writeOtherData(dataOut, temp.objType);
         writeJavaInt(dataOut, temp.xPos);
         writeJavaInt(dataOut, temp.yPos);
@@ -287,39 +302,39 @@ void Level::writeDataToFile(char const* filepath)
     BgCon tempCon;
     for(int i = 0; i < numBgSwitch; i++)
     {
-        tempCon = getBgConAtIndex(i);
+        tempCon = this->getBgConAtIndex(i);
         writeJavaInt(dataOut, tempCon.xPos);
         writeOtherData(dataOut, tempCon.customGraphics);
         //Will need reworking once I can figure out how the custom graphics work
         if(tempCon.customGraphics)
         {
-            std::cout << "the program will break now";
+            std::cout << "the program will break now" << std::endl;
         }
         else
         {
             writeJavaInt(dataOut, tempCon.colorID);
         }
     }
-    writeJavaInt(dataOut, numGravitySwitch);
+    writeJavaInt(dataOut, this->numGravitySwitch);
     GravityChange tempGrav;
-    for(int i = 0; i < numGravitySwitch; i++)
+    for(int i = 0; i < this->numGravitySwitch; i++)
     {
-        tempGrav = getGravityAtIndex(i);
+        tempGrav = this->getGravityAtIndex(i);
         writeJavaInt(dataOut, tempGrav.xPos);
     }
-    writeJavaInt(dataOut, numRisingBlocks);
+    writeJavaInt(dataOut, this->numRisingBlocks);
     RisingBlocks tempRising;
-    for(int i = 0; i < numRisingBlocks; i++)
+    for(int i = 0; i < this->numRisingBlocks; i++)
     {
-        tempRising = getRisingAtIndex(i);
+        tempRising = this->getRisingAtIndex(i);
         writeJavaInt(dataOut, tempRising.startX);
         writeJavaInt(dataOut, tempRising.endX);
     }
-    writeJavaInt(dataOut, numFallingBlocks);
+    writeJavaInt(dataOut, this->numFallingBlocks);
     FallingBlocks tempFalling;
-    for(int i = 0; i < numFallingBlocks; i++)
+    for(int i = 0; i < this->numFallingBlocks; i++)
     {
-        tempFalling = getFallingAtIndex(i);
+        tempFalling = this->getFallingAtIndex(i);
         writeJavaInt(dataOut, tempFalling.startX);
         writeJavaInt(dataOut, tempFalling.startX);
     }
@@ -327,153 +342,153 @@ void Level::writeDataToFile(char const* filepath)
 
 int Level::getFormatVer()
 {
-    return formatVer;
+    return this->formatVer;
 }
 
 BlockObj Level::getBlockAtIndex(int index)
 {
-    return blockObjs->at(index);
+    return this->blockObjs->at(index);
 }
 
 BgCon Level::getBgConAtIndex(int index)
 {
-    return backgroundSwitches->at(index);
+    return this->backgroundSwitches->at(index);
 
 }
 
 GravityChange Level::getGravityAtIndex(int index)
 {
-    return gravitySwitches->at(index);
+    return this->gravitySwitches->at(index);
 }
 
 RisingBlocks Level::getRisingAtIndex(int index)
 {
-    return risingSections->at(index);
+    return this->risingSections->at(index);
 }
 
 FallingBlocks Level::getFallingAtIndex(int index)
 {
-    return fallingSections->at(index);
+    return this->fallingSections->at(index);
 }
 
 int Level::getEndPos()
 {
-    return endWallPos;
+    return this->endWallPos;
 }
 
 int Level::getObjCount()
 {
-    return numBlocks;
+    return this->numBlocks;
 }
 
 int Level::getBgCount()
 {
-    return numBgSwitch;
+    return this->numBgSwitch;
 }
 
 int Level::getGravityCount()
 {
-    return numGravitySwitch;
+    return this->numGravitySwitch;
 }
 
 int Level::getRisingCount()
 {
-    return numRisingBlocks;
+    return this->numRisingBlocks;
 }
 
 int Level::getFallingCount()
 {
-    return numFallingBlocks;
+    return this->numFallingBlocks;
 }
 
 void Level::addNewBlock(BlockObj toAdd)
 {
-    toAdd.indexInVec = numBlocks;
+    toAdd.indexInVec = this->numBlocks;
     numBlocks++;
-    blockObjs->push_back(toAdd);
+    this->blockObjs->push_back(toAdd);
 }
 
 void Level::addBgCon(BgCon toAdd)
 {
-    toAdd.indexInVec = numBgSwitch;
+    toAdd.indexInVec = this->numBgSwitch;
     numBgSwitch++;
-    backgroundSwitches->push_back(toAdd);
+    this->backgroundSwitches->push_back(toAdd);
 }
 
 void Level::addGravitySwitch(GravityChange toAdd)
 {
-    toAdd.indexInVec = numGravitySwitch;
+    toAdd.indexInVec = this->numGravitySwitch;
     numGravitySwitch++;
-    gravitySwitches->push_back(toAdd);
+    this->gravitySwitches->push_back(toAdd);
 }
 
 void Level::addRisingBlocks(RisingBlocks toAdd)
 {
-    toAdd.indexInVec = numRisingBlocks;
+    toAdd.indexInVec = this->numRisingBlocks;
     numRisingBlocks++;
-    risingSections->push_back(toAdd);
+    this->risingSections->push_back(toAdd);
 }
 
 void Level::addFallingBlocks(FallingBlocks toAdd)
 {
-    toAdd.indexInVec = numFallingBlocks;
+    toAdd.indexInVec = this->numFallingBlocks;
     numFallingBlocks++;
-    fallingSections->push_back(toAdd);
+    this->fallingSections->push_back(toAdd);
 }
 
 void Level::setEndPos(int endPos)
 {
-    endWallPos = endPos;
+    this->endWallPos = endPos;
 }
 
 void Level::removeBlockAtIndex(int index)
 {
-
+    this->blockObjs->erase(this->blockObjs->begin() + index);
 }
        
 void Level::removeLastBlock()
 {
-
+    this->blockObjs->pop_back();
 }
 
 void Level::removeBgConAtIndex(int index)
 {
-
+    this->backgroundSwitches->erase(this->backgroundSwitches->begin() + index);
 }
 
 void Level::removeLastBgCon()
 {
-
+    this->backgroundSwitches->pop_back();
 }
 
 void Level::removeGravitySwitchAtIndex(int index)
 {
-
+    this->gravitySwitches->erase(this->gravitySwitches->begin() + index);
 }
 
 void Level::removeLastGravitySwitch()
 {
-
+    this->gravitySwitches->pop_back();
 }
 
 void Level::removeRisingBlocksAtIndex(int index)
 {
-
+    this->risingSections->erase(this->risingSections->begin() + index);
 }
 
 void Level::removeLastRisingBlocks()
 {
-
+    this->risingSections->pop_back();
 }
 
 void Level::removeFallingBlocksAtIndex(int index)
 {
-
+    this->fallingSections->erase(this->fallingSections->begin() + index);
 }
 
 void Level::removeLastFallingBlocks()
 {
-
+    this->fallingSections->pop_back();
 }
 
 void Level::printAllInfo()
