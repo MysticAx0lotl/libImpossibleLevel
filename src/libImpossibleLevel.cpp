@@ -481,6 +481,7 @@ void Level::addBgCon(BgCon toAdd)
 {
     toAdd.indexInVec = this->numBgSwitch;
     numBgSwitch++;
+    toAdd.colorName = this->colorNames[toAdd.colorID];
     this->backgroundSwitches->push_back(toAdd);
 }
 
