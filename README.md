@@ -5,5 +5,5 @@ Progress:
 - Write level data back to file
 
 To Do:
-- Adding blocks, spikes, and pits is broken in some very strange ways
+- Adding blocks, spikes, and pits has very strange behavior in certain scenarios
 - Understand how custom graphics work (seemingly unused by the actual game)
