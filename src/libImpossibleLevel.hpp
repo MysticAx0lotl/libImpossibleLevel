@@ -9,7 +9,7 @@
 /*
 BlockObj: short for "block object"
 xPos = the object's x position in raw coordinates (divide by 30 to get its grid space)
-yPos = the object's y position in raw coordinates
+yPos = the object's y position in raw coordinates (instead serves as the ending x position for pits)
 objType = the object's type ID (00 for a block, 01 for a spike, 02 for a pit)
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
 */
