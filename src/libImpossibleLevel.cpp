@@ -381,7 +381,7 @@ int Level::getFormatVer()
     return this->formatVer;
 }
 
-BlockObject Level::getBlockAtIndex(int index)
+BlockObject& Level::getBlockAtIndex(int index)
 {
     if(index < this->numBlockObjects)
     {
@@ -394,7 +394,7 @@ BlockObject Level::getBlockAtIndex(int index)
     }
 }
 
-BackgroundChange Level::getBackgroundAtIndex(int index)
+BackgroundChange& Level::getBackgroundAtIndex(int index)
 {
     if(index < this->numBackgroundChanges)
     {
@@ -408,7 +408,7 @@ BackgroundChange Level::getBackgroundAtIndex(int index)
 
 }
 
-GravityChange Level::getGravAtIndex(int index)
+GravityChange& Level::getGravAtIndex(int index)
 {
     if(index < this->numGravityChanges)
     {
@@ -421,7 +421,7 @@ GravityChange Level::getGravAtIndex(int index)
     }
 }
 
-BlocksRise Level::getRisingAtIndex(int index)
+BlocksRise& Level::getRisingAtIndex(int index)
 {
     if(index < this->numBlocksRise)
     {
@@ -434,7 +434,7 @@ BlocksRise Level::getRisingAtIndex(int index)
     }
 }
 
-BlocksFall Level::getFallingAtIndex(int index)
+BlocksFall& Level::getFallingAtIndex(int index)
 {
     if(index < this->numBlocksFall)
     {

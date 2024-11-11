@@ -125,11 +125,11 @@ class Level
 
         //get methods
         int getFormatVer();
-        BlockObject getBlockAtIndex(int);
-        BackgroundChange getBackgroundAtIndex(int);
-        GravityChange getGravAtIndex(int);
-        BlocksRise getRisingAtIndex(int);
-        BlocksFall getFallingAtIndex(int);
+        BlockObject& getBlockAtIndex(int);
+        BackgroundChange& getBackgroundAtIndex(int);
+        GravityChange& getGravAtIndex(int);
+        BlocksRise& getRisingAtIndex(int);
+        BlocksFall& getFallingAtIndex(int);
         int getEndPos();
         int getBlockCount();
         int getBackgroundCount();
