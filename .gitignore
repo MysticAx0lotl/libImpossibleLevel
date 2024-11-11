@@ -401,3 +401,4 @@ src/a.exe
 *.gch
 /src/output
 /.vscode
+/.vscode
