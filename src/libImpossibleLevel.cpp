@@ -342,6 +342,8 @@ void Level::saveLevel(char const* filepath)
         writeOtherData(dataOut, tempCon.customTexture);
         if(tempCon.customTexture)
         {
+            short strLen = sizeof(tempCon.filePath);
+            writeJavaShort(dataOut, strLen);
             for(int i = 0; i < sizeof(tempCon.filePath); i++)
             {
                 writeOtherData(dataOut, tempCon.filePath[i]);
