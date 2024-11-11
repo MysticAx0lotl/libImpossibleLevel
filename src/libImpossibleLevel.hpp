@@ -22,7 +22,7 @@ struct BlockObj
 };
 
 /*
-BgCon: short for "background controller", i.e. the invisible objects that change the color or texture of the background
+BackgroundChange: the invisible objects that change the color or texture of the background
 xPos = the object's x position in raw coordinates (divide by 30 to get its grid space)
 colorId = the ID of the background color that will be used when this object is passed ()
 customGraphics = the editor's seemingly-unused ability to load an actual texture image instead of using a color
@@ -51,7 +51,7 @@ struct GravityChange
 };
 
 /*
-RisingBlocks: the object that enables the fade effect where blocks will rise from the ground on the right side of the screen
+BlocksRise: the object that enables the fade effect where blocks will rise from the ground on the right side of the screen
 startX = the x positon where the effect will be enabled
 endX = the x position where the effect will be disabled
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
@@ -65,7 +65,7 @@ struct BlocksRise
 };
 
 /*
-FallingBlocks: the object that enables the fade effect where blocks will fall to the ground on the left side of the screen
+BlocksFall: the object that enables the fade effect where blocks will fall to the ground on the left side of the screen
 startX = the x positon where the effect will be enabled
 endX = the x position where the effect will be disabled
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
