@@ -29,13 +29,13 @@ customGraphics = the editor's seemingly-unused ability to load an actual texture
 customFile = the also unused UTF-8 string pointing to a texture
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
 */
-struct BgCon
+struct BackgroundChange
 {
     int xPos;
     int colorID;
     const char* colorName;
     bool customGraphics;
-    const char* customFile;
+    const char* filePath;
     int indexInVec;
 };
 
@@ -57,7 +57,7 @@ endX = the x position where the effect will be disabled
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
 Note: this and fallingBlocks could be merged into a single struct, but I don't want to merge them to keep true to the original code
 */
-struct RisingBlocks
+struct BlocksRise
 {
     int startX;
     int endX;
@@ -70,7 +70,7 @@ startX = the x positon where the effect will be enabled
 endX = the x position where the effect will be disabled
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
 */
-struct FallingBlocks
+struct BlocksFall
 {
     int startX;
     int endX;
@@ -126,54 +126,54 @@ class Level
         //get methods
         int getFormatVer();
         BlockObj getBlockAtIndex(int);
-        BgCon getBgConAtIndex(int);
-        GravityChange getGravityAtIndex(int);
-        RisingBlocks getRisingAtIndex(int);
-        FallingBlocks getFallingAtIndex(int);
+        BackgroundChange getBackgroundAtIndex(int);
+        GravityChange getGravAtIndex(int);
+        BlocksRise getRisingAtIndex(int);
+        BlocksFall getFallingAtIndex(int);
         int getEndPos();
-        int getObjCount();
-        int getBgCount();
+        int getBlockCount();
+        int getBackgroundCount();
         int getGravityCount();
         int getRisingCount();
         int getFallingCount();
 
         //set methods
-        void addNewBlock(BlockObj);
-        void addBgCon(BgCon);
-        void addGravitySwitch(GravityChange);
-        void addRisingBlocks(RisingBlocks);
-        void addFallingBlocks(FallingBlocks);
+        void addBlock(BlockObj);
+        void addBackground(BackgroundChange);
+        void addGravity(GravityChange);
+        void addRising(BlocksRise);
+        void addFalling(BlocksFall);
         void setEndPos(int);
 
         //removal methods
         void removeBlockAtIndex(int);
         void removeLastBlock();
-        void removeBgConAtIndex(int);
-        void removeLastBgCon();
-        void removeGravitySwitchAtIndex(int);
-        void removeLastGravitySwitch();
-        void removeRisingBlocksAtIndex(int);
-        void removeLastRisingBlocks();
-        void removeFallingBlocksAtIndex(int);
-        void removeLastFallingBlocks();
+        void removeBackgroundAtIndex(int);
+        void removeLastBackground();
+        void removeGravityAtIndex(int);
+        void removeLastGravity();
+        void removeRisingAtIndex(int);
+        void removeLastRising();
+        void removeFallingAtIndex(int);
+        void removeLastFalling();
 
         void printAllInfo();
 
     private:
         std::vector<BlockObj> *blockObjs = new std::vector<BlockObj>;
-        std::vector<BgCon> *backgroundSwitches = new std::vector<BgCon>;
-        std::vector<GravityChange> *gravitySwitches = new std::vector<GravityChange>;
-        std::vector<RisingBlocks> *risingSections = new std::vector<RisingBlocks>;
-        std::vector<FallingBlocks> *fallingSections = new std::vector<FallingBlocks>;
+        std::vector<BackgroundChange> *backgroundChanges = new std::vector<BackgroundChange>;
+        std::vector<GravityChange> *gravityChanges = new std::vector<GravityChange>;
+        std::vector<BlocksRise> *blocksRises = new std::vector<BlocksRise>;
+        std::vector<BlocksFall> *blocksFalls = new std::vector<BlocksFall>;
         short numBlocks;
-        int numBgSwitch;
-        int numGravitySwitch;
-        int numRisingBlocks;
-        int numFallingBlocks;
-        int endWallPos;
+        int numBackgrounds;
+        int numGravityChanges;
+        int numBlocksRise;
+        int numBlocksFall;
+        int endPos;
         bool customGraphicsEnabled;
         int formatVer;
-        const char* objNames[3] = {"Platform", "Spike", "Pit"}; 
+        const char* blockNames[3] = {"Platform", "Spike", "Pit"}; 
         const char* colorNames[6] = {"blue", "yellow", "green", "violet", "pink", "black"};
 };
 
