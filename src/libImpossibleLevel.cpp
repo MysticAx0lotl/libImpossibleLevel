@@ -391,7 +391,7 @@ BlockObject& Level::getBlockAtIndex(int index)
     }
     else
     {
-        BlockObject nullObj = {0, 0, 0, 0};
+        static BlockObject nullObj = {0, 0, 0, 0};
         return nullObj;
     }
 }
@@ -404,7 +404,7 @@ BackgroundChange& Level::getBackgroundAtIndex(int index)
     }
     else
     {
-        BackgroundChange nullObj = {0, 0, "null", false, "null", 0};
+        static BackgroundChange nullObj = {0, 0, "null", false, "null", 0};
         return nullObj;
     }
 
@@ -418,7 +418,7 @@ GravityChange& Level::getGravAtIndex(int index)
     }
     else
     {
-        GravityChange nullObj = {0, 0};
+        static GravityChange nullObj = {0, 0};
         return nullObj;
     }
 }
@@ -431,7 +431,7 @@ BlocksRise& Level::getRisingAtIndex(int index)
     }
     else
     {
-        BlocksRise nullObj = {0, 0, 0};
+        static BlocksRise nullObj = {0, 0, 0};
         return nullObj;
     }
 }
@@ -444,7 +444,7 @@ BlocksFall& Level::getFallingAtIndex(int index)
     }
     else
     {
-        BlocksFall nullObj = {0, 0, 0};
+        static BlocksFall nullObj = {0, 0, 0};
         return nullObj;
     }
 }
