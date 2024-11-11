@@ -399,3 +399,4 @@ FodyWeavers.xsd
 extras/a.exe
 src/a.exe
 *.gch
+/src/output

@@ -13,7 +13,7 @@ yPos = the object's y position in raw coordinates (instead serves as the ending 
 objType = the object's type ID (00 for a block, 01 for a spike, 02 for a pit)
 indexInVec = the object's index in the vector it's part of. Only used by this library, does not get read from or written to the level file
 */
-struct BlockObj
+struct BlockObject
 {
     int xPos;
     int yPos;
@@ -34,7 +34,7 @@ struct BackgroundChange
     int xPos;
     int colorID;
     const char* colorName;
-    bool customGraphics;
+    bool customTexture;
     const char* filePath;
     int indexInVec;
 };
@@ -118,14 +118,14 @@ class Level
 {
     public:
         Level();
-        Level(char const*);
+        Level(char const*, bool);
         ~Level();
-        void loadDataFromFile(char const*);
-        void writeDataToFile(char const*);
+        void loadLevel(char const*, bool);
+        void saveLevel(char const*);
 
         //get methods
         int getFormatVer();
-        BlockObj getBlockAtIndex(int);
+        BlockObject getBlockAtIndex(int);
         BackgroundChange getBackgroundAtIndex(int);
         GravityChange getGravAtIndex(int);
         BlocksRise getRisingAtIndex(int);
@@ -138,7 +138,7 @@ class Level
         int getFallingCount();
 
         //set methods
-        void addBlock(BlockObj);
+        void addBlock(BlockObject);
         void addBackground(BackgroundChange);
         void addGravity(GravityChange);
         void addRising(BlocksRise);
@@ -160,13 +160,13 @@ class Level
         void printAllInfo();
 
     private:
-        std::vector<BlockObj> *blockObjs = new std::vector<BlockObj>;
+        std::vector<BlockObject> *blockObjects = new std::vector<BlockObject>;
         std::vector<BackgroundChange> *backgroundChanges = new std::vector<BackgroundChange>;
         std::vector<GravityChange> *gravityChanges = new std::vector<GravityChange>;
         std::vector<BlocksRise> *blocksRises = new std::vector<BlocksRise>;
         std::vector<BlocksFall> *blocksFalls = new std::vector<BlocksFall>;
-        short numBlocks;
-        int numBackgrounds;
+        short numBlockObjects;
+        int numBackgroundChanges;
         int numGravityChanges;
         int numBlocksRise;
         int numBlocksFall;
