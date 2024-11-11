@@ -1,28 +1,27 @@
 #include "libImpossibleLevel.hpp"
 
 //Source: https://codereview.stackexchange.com/a/22907
-//modified to convert to and then return an unsigned char vector on the heap instead of a signed one on the stack
-static std::vector<unsigned char>* ReadAllBytes(char const* filename)
+//modified to convert to and then return an unsigned char vector instead of a signed one
+static std::vector<unsigned char> ReadAllBytes(char const* filename)
 {
     std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
     if (pos == 0) {
-        return new std::vector<unsigned char>;
+        return std::vector<unsigned char>{};
     }
 
-    std::vector<char>* result = new std::vector<char>(pos);
+    std::vector<char>  result(pos);
 
     ifs.seekg(0, std::ios::beg);
-    ifs.read(&result->at(0), pos);
+    ifs.read(&result[0], pos);
 
-    std::vector<unsigned char>* returnVal = new std::vector<unsigned char>(pos);
-    for(int i = 0; i < result->size(); i++)
+    std::vector<unsigned char> returnVal(pos);
+    for(int i = 0; i < result.size(); i++)
     {
-        returnVal->at(i) = static_cast<unsigned char>(result->at(i));
+        returnVal[i] = static_cast<unsigned char>(result[i]);
     }
 
-    delete result;
     return returnVal;
 }
 
@@ -32,7 +31,7 @@ static std::vector<unsigned char>* ReadAllBytes(char const* filename)
 //This function takes an array of chars and a byte to start from. 
 //It bit-shifts the starting byte and the next three bytes, then joins them together into a single int
 //file = loaded file as a array of chars, startingOffset = the byte to start processing from
-int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
+int readIntFromJava(std::vector<unsigned char> &file, int startingOffset)
 {
     unsigned int bit1, bit2, bit3, bit4;
     bit1 = static_cast<unsigned int>(file[startingOffset]);
@@ -53,7 +52,7 @@ int readIntFromJava(std::vector<unsigned char> file, int startingOffset)
 //This function takes an array of chars and a byte to start from. 
 //It bit-shifts the starting byte and the next byte, then joins them together into a single short
 //file = loaded file as a array of chars, startingOffset = the byte to start processing from
-short readShortFromJava(std::vector<unsigned char> file, int startingOffset)
+short readShortFromJava(std::vector<unsigned char> &file, int startingOffset)
 {
     unsigned short bit1, bit2;
     bit1 = static_cast<unsigned int>(file[startingOffset]);
@@ -118,10 +117,10 @@ void Level::loadLevel(char const* filepath, bool debugMode)
 {
     int currentByte = 0; //tracks the current byte in the file 
     if(debugMode){std::cout << "Attempting to read file " << filepath << std::endl;}
-    std::vector<unsigned char> *levelChars = ReadAllBytes(filepath); //load file from path, store in the heap
+    std::vector<unsigned char> levelChars = ReadAllBytes(filepath); //load file from path, store in the heap
     
     //make sure we actually loaded data
-    if (levelChars->size() == 0)
+    if (levelChars.size() == 0)
     {
         if(debugMode){std::cout << "Loaded empty file, data will not be processed!" << std::endl;}
     }
@@ -129,14 +128,14 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     {
         //first four bytes in the file are the format version, stored as an int
         if(debugMode){std::cout << "Getting file format version..." << std::endl;}
-        this->formatVer = readIntFromJava(*levelChars, currentByte);
+        this->formatVer = readIntFromJava(levelChars, currentByte);
         currentByte += 4;
         
         if(debugMode){std::cout << "Format version " << this->formatVer << std::endl;}
 
         //the next byte is a bool seeing if custom graphics are enabled
         if(debugMode){std::cout << "Checking if custom graphics are enabled..." << std::endl;}
-        this->customGraphicsEnabled = static_cast<bool>(levelChars->at(currentByte));
+        this->customGraphicsEnabled = static_cast<bool>(levelChars.at(currentByte));
         if(this->customGraphicsEnabled)
         {
             if(debugMode){std::cout << "Custom graphics enabled, this feature is currently being studied and implemented. Expect strange behavior!" << std::endl;}
@@ -145,7 +144,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
 
         //the next two bytes are the number of blocks in the level, stored as a short
         if(debugMode){std::cout << "Reading block count..." << std::endl;}
-        this->numBlockObjects = readShortFromJava(*levelChars, currentByte);
+        this->numBlockObjects = readShortFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << this->numBlockObjects << " blocks in the level" << std::endl;}
         currentByte += 2;
 
@@ -156,15 +155,15 @@ void Level::loadLevel(char const* filepath, bool debugMode)
         for(int i = 0; i < this->numBlockObjects; i++)
         {
 
-            tempBlockObject->objType = static_cast<int>(levelChars->at(currentByte));
+            tempBlockObject->objType = static_cast<int>(levelChars.at(currentByte));
             if(debugMode){std::cout << "The current block type is " << tempBlockObject->objType << std::endl;}
             currentByte++;
     
-            tempBlockObject->xPos = readIntFromJava(*levelChars, currentByte);
+            tempBlockObject->xPos = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current block's xpos is " << tempBlockObject->xPos << std::endl;}
             currentByte += 4;
     
-            tempBlockObject->yPos = readIntFromJava(*levelChars, currentByte);
+            tempBlockObject->yPos = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current block's ypos is " << tempBlockObject->yPos << std::endl;}
             currentByte += 4;
     
@@ -179,13 +178,13 @@ void Level::loadLevel(char const* filepath, bool debugMode)
         delete tempBlockObject;
     
         //the next four bytes are the x position of the end of the level, stored as an int
-        this->endPos = readIntFromJava(*levelChars, currentByte);
+        this->endPos = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "End wall is located at X position " << this->endPos << std::endl;}
         currentByte += 4;
     
         //the next four bytes are the number of color changes in the level, stored as an int
         if(debugMode){std::cout << "Attempting to read color change count" << std::endl;}
-        this->numBackgroundChanges = readIntFromJava(*levelChars, currentByte);
+        this->numBackgroundChanges = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << this->numBackgroundChanges << " color triggers in the level" << std::endl;}
         currentByte += 4;
     
@@ -196,11 +195,11 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         for(int i = 0; i < this->numBackgroundChanges; i++)
         {
-            tempBackgroundChage->xPos = readIntFromJava(*levelChars, currentByte);
+            tempBackgroundChage->xPos = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current color trigger's xpos is " << tempBackgroundChage->xPos << std::endl;};
             currentByte += 4;
     
-            tempBackgroundChage->customTexture = static_cast<bool>(levelChars->at(currentByte));
+            tempBackgroundChage->customTexture = static_cast<bool>(levelChars.at(currentByte));
             currentByte++; //WILL CURRENTLY BREAK HERE IF CUSTOM GRAPHICS ARE ENABLED
 
             if(tempBackgroundChage->customTexture)
@@ -209,7 +208,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
             }
             else
             {
-                tempBackgroundChage->colorID = readIntFromJava(*levelChars, currentByte);
+                tempBackgroundChage->colorID = readIntFromJava(levelChars, currentByte);
                 if(debugMode){std::cout << "The current color type is " << this->colorNames[tempBackgroundChage->colorID] << std::endl;}
                 currentByte += 4;
             }
@@ -227,7 +226,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         //The next 4 bytes are the number of gravity changes in the level, stored as an int
         if(debugMode){std::cout << "Attempting to read gravity change count" << std::endl;}
-        this->numGravityChanges = readIntFromJava(*levelChars, currentByte);
+        this->numGravityChanges = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << this->numGravityChanges << " gravity changes in the level" << std::endl;}
         currentByte += 4;
     
@@ -237,7 +236,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         for(int i = 0; i < this->numGravityChanges; i++)
         {
-            tempGravityChange->xPos = readIntFromJava(*levelChars, currentByte);
+            tempGravityChange->xPos = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current gravity trigger's xpos is " << tempGravityChange->xPos << std::endl;}
             currentByte += 4;
     
@@ -254,7 +253,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         //The next 4 bytes are the number of falling block fade effects, stored as an int
         if(debugMode){std::cout << "Attempting to read falling block count" << std::endl;}
-        this->numBlocksFall = readIntFromJava(*levelChars, currentByte);
+        this->numBlocksFall = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << this->numBlocksFall << " falling blocks in the level" << std::endl;}
         currentByte += 4;
     
@@ -264,11 +263,11 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         for(int i = 0; i < this->numBlocksFall; i++)
         {
-            tempBlocksFall->startX = readIntFromJava(*levelChars, currentByte);
+            tempBlocksFall->startX = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current falling block startX is " << tempBlocksFall->startX << std::endl;}
             currentByte += 4;
     
-            tempBlocksFall->endX = readIntFromJava(*levelChars, currentByte);
+            tempBlocksFall->endX = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current falling block endX is " << tempBlocksFall->endX << std::endl;}
             currentByte += 4;
     
@@ -285,7 +284,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         //The next 4 bytes are the number of rising block fade effects, stored as an int
         if(debugMode){std::cout << "Attempting to read rising block count" << std::endl;}
-        this->numBlocksRise = readIntFromJava(*levelChars, currentByte);
+        this->numBlocksRise = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << numBlocksRise << " rising blocks in the level" << std::endl;}
         currentByte += 4;
 
@@ -295,11 +294,11 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
         for(int i = 0; i < this->numBlocksFall; i++)
         {
-            tempBlocksRise->startX = readIntFromJava(*levelChars, currentByte);
+            tempBlocksRise->startX = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current rising block startX is " << tempBlocksRise->startX << std::endl;}
             currentByte += 4;
     
-            tempBlocksRise->endX = readIntFromJava(*levelChars, currentByte);
+            tempBlocksRise->endX = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current rising block endX is " << tempBlocksRise->endX << std::endl;}
             currentByte += 4;
     
@@ -316,7 +315,6 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     }
 
     if(debugMode){std::cout << "Loaded entire level!" << std::endl;}
-    delete levelChars; //all data is now stored in the class, the raw level data is no longer needed
 }
 
 void Level::saveLevel(char const* filepath)
@@ -479,40 +477,40 @@ int Level::getFallingCount()
     return this->numBlocksFall;
 }
 
-void Level::addBlock(BlockObject toAdd)
+void Level::addBlock(BlockObject *toAdd)
 {
-    toAdd.indexInVec = this->numBlockObjects;
+    toAdd->indexInVec = this->numBlockObjects;
     numBlockObjects++;
-    this->blockObjects->push_back(toAdd);
+    this->blockObjects->push_back(*toAdd);
 }
 
-void Level::addBackground(BackgroundChange toAdd)
+void Level::addBackground(BackgroundChange *toAdd)
 {
-    toAdd.indexInVec = this->numBackgroundChanges;
+    toAdd->indexInVec = this->numBackgroundChanges;
     numBackgroundChanges++;
-    toAdd.colorName = this->colorNames[toAdd.colorID];
-    this->backgroundChanges->push_back(toAdd);
+    toAdd->colorName = this->colorNames[toAdd->colorID];
+    this->backgroundChanges->push_back(*toAdd);
 }
 
-void Level::addGravity(GravityChange toAdd)
+void Level::addGravity(GravityChange *toAdd)
 {
-    toAdd.indexInVec = this->numGravityChanges;
+    toAdd->indexInVec = this->numGravityChanges;
     numGravityChanges++;
-    this->gravityChanges->push_back(toAdd);
+    this->gravityChanges->push_back(*toAdd);
 }
 
-void Level::addRising(BlocksRise toAdd)
+void Level::addRising(BlocksRise *toAdd)
 {
-    toAdd.indexInVec = this->numBlocksRise;
+    toAdd->indexInVec = this->numBlocksRise;
     numBlocksRise++;
-    this->blocksRises->push_back(toAdd);
+    this->blocksRises->push_back(*toAdd);
 }
 
-void Level::addFalling(BlocksFall toAdd)
+void Level::addFalling(BlocksFall *toAdd)
 {
-    toAdd.indexInVec = this->numBlocksFall;
+    toAdd->indexInVec = this->numBlocksFall;
     numBlocksFall++;
-    this->blocksFalls->push_back(toAdd);
+    this->blocksFalls->push_back(*toAdd);
 }
 
 void Level::setEndPos(int endPos)
