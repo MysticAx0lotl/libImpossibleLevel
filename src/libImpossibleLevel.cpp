@@ -340,10 +340,12 @@ void Level::saveLevel(char const* filepath)
         tempCon = this->getBackgroundAtIndex(i);
         writeJavaInt(dataOut, tempCon.xPos);
         writeOtherData(dataOut, tempCon.customTexture);
-        //Will need reworking once I can figure out how the custom graphics work
         if(tempCon.customTexture)
         {
-            std::cout << "the program will break now" << std::endl;
+            for(int i = 0; i < sizeof(tempCon.filePath); i++)
+            {
+                writeOtherData(dataOut, tempCon.filePath[i]);
+            }
         }
         else
         {

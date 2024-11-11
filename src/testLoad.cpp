@@ -4,6 +4,6 @@
 int main()
 {
     Level leveldata("output/heaven.lvl/level.dat", true);
-
+    BlockObject test = leveldata.getBlockAtIndex(0);
     return 0;
 }
