@@ -134,6 +134,7 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     if (levelChars.size() == 0)
     {
         if(debugMode){std::cout << "Loaded empty file, data will not be processed!" << std::endl;}
+        Level(false); //call blank constructor if empty file is loaded
     }
     else
     {
