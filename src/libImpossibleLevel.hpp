@@ -117,7 +117,7 @@ PRIVATE MEMBERS
 class Level
 {
     public:
-        Level();
+        Level(bool);
         Level(char const*, bool);
         ~Level();
         void loadLevel(char const*, bool);

@@ -90,10 +90,21 @@ void writeOtherData(std::ofstream& datafile, unsigned char data)
     datafile.write(reinterpret_cast<const char*>(&data), sizeof(data));
 }
 
-//Constructor that throws an error if no filepath is given
-Level::Level()
+//Constructor that generates a blank level if no filepath is given
+Level::Level(bool debugMode)
 {
-    std::cout << "ERROR: Must provide a filepath!";
+    if(debugMode){std::cout << "No filepath was given, a blank level will be generated..." << std::endl;}
+
+    numBlockObjects = 0;
+    numBackgroundChanges = 0;
+    numGravityChanges = 0;
+    numBlocksRise = 0;
+    numBlocksFall = 0;
+    endPos = 3015;
+    customGraphicsEnabled = false;
+    formatVer = 0;
+
+    if(debugMode){std::cout << "Blank level generated!" << std::endl;}
 }
 
 //Constructor that calls loadDataFromFile
