@@ -108,9 +108,10 @@ Level::Level(bool debugMode)
 }
 
 //Constructor that calls loadDataFromFile
-Level::Level(char const* filename, bool debugMode)
+Level::Level(std::string filename, bool debugMode)
 {
-    this->loadLevel(filename, debugMode);
+    filename += "/level.dat";
+    this->loadLevel(filename.c_str(), debugMode);
 }
 
 //Destructor that removes all data from the heap
@@ -329,10 +330,17 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     if(debugMode){std::cout << "Loaded entire level!" << std::endl;}
 }
 
-void Level::saveLevel(char const* filepath)
+void Level::saveLevel(std::string filepath)
 {
+    if(!std::filesystem::exists(filepath))
+    {
+        std::filesystem::create_directory(filepath);
+    }
+
+    filepath += "/level.dat";
+
     std::ofstream dataOut;
-    dataOut.open(filepath, std::ios_base::binary | std::ios_base::out);
+    dataOut.open(filepath.c_str(), std::ios_base::binary | std::ios_base::out);
     writeJavaInt(dataOut, this->formatVer);
     writeOtherData(dataOut, this->customGraphicsEnabled);
     writeJavaShort(dataOut, this->numBlockObjects);

@@ -4,7 +4,8 @@
 int main()
 {
     Level leveldata(false);
-    leveldata.saveLevel("output.dat");
+    
+    leveldata.saveLevel("blank.lvl");
 
     return 0;
 }

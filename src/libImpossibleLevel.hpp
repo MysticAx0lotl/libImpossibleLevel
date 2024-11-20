@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <filesystem>
 
 /*
 BlockObj: short for "block object"
@@ -118,10 +119,10 @@ class Level
 {
     public:
         Level(bool);
-        Level(char const*, bool);
+        Level(std::string, bool);
         ~Level();
         void loadLevel(char const*, bool);
-        void saveLevel(char const*);
+        void saveLevel(std::string); //char const* is still needed in loadLevel since it passes that value to a lot of other functions, while saveLevel does not
 
         //get methods
         int getFormatVer();
