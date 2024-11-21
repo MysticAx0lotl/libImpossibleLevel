@@ -99,7 +99,7 @@ PUBLIC MEMBERS
 - setEndPos(int): set the position of the end wall to the given parameter
 - remove____AtIndex(int): removes the object at the given index from the appropriate vector, if the given index is in bounds
 - removeLast____(): removes the last entry from the appropriate vector, if the appropriate vector isn't empty
-- printAllInfo(): currently does nothing
+- printSummary(): prints a short summary including the format version, which objects the level has and how many, which custom textures the level uses if any, and where the level starts and ends
 
 PRIVATE MEMBERS
 - blockObjs: pointer to a vector of BlockObj objects, stored in the heap
@@ -158,14 +158,15 @@ class Level
         void removeFallingAtIndex(int);
         void removeLastFalling();
 
-        void printAllInfo();
+        void printSummary();
 
     private:
-        std::vector<BlockObject> *blockObjects = new std::vector<BlockObject>;
-        std::vector<BackgroundChange> *backgroundChanges = new std::vector<BackgroundChange>;
-        std::vector<GravityChange> *gravityChanges = new std::vector<GravityChange>;
-        std::vector<BlocksRise> *blocksRises = new std::vector<BlocksRise>;
-        std::vector<BlocksFall> *blocksFalls = new std::vector<BlocksFall>;
+        std::vector<BlockObject> blockObjects;
+        std::vector<BackgroundChange> backgroundChanges;
+        std::vector<GravityChange> gravityChanges;
+        std::vector<BlocksRise> blocksRises;
+        std::vector<BlocksFall> blocksFalls;
+        std::vector<std::string> customTextures;
         short numBlockObjects;
         int numBackgroundChanges;
         int numGravityChanges;

@@ -114,14 +114,10 @@ Level::Level(std::string filename, bool debugMode)
     this->loadLevel(filename.c_str(), debugMode);
 }
 
-//Destructor that removes all data from the heap
+//Destructor that serves no purpose right now
 Level::~Level()
 {
-    delete this->blockObjects;
-    delete this->backgroundChanges;
-    delete this->gravityChanges;
-    delete this->blocksRises;
-    delete this->blocksFalls;
+
 }
 
 //Parse level data from the given filepath, called by constructor
@@ -182,12 +178,12 @@ void Level::loadLevel(char const* filepath, bool debugMode)
     
             tempBlockObject->indexInVec = i;
             if(debugMode){std::cout << "This block can be found at index " << tempBlockObject->indexInVec << std::endl;}
-            this->blockObjects->push_back(*tempBlockObject);
+            this->blockObjects.push_back(*tempBlockObject);
     
             if(debugMode){std::cout << "Loaded object successfully!" << std::endl;}
         }
     
-        if(debugMode){std::cout << "Loaded " << this->blockObjects->size() << " object(s)!" << std::endl;}
+        if(debugMode){std::cout << "Loaded " << this->blockObjects.size() << " object(s)!" << std::endl;}
         delete tempBlockObject;
     
         //the next four bytes are the x position of the end of the level, stored as an int
@@ -218,6 +214,8 @@ void Level::loadLevel(char const* filepath, bool debugMode)
             if(tempBackgroundChage->customTexture)
             {
                 if(debugMode){std::cout << "Custom background support is currently a stub" << std::endl;}
+
+                //DO NOT FORGET TO ADD THE REQUESTED FILE TO customTextures!!!!!!!
             }
             else
             {
@@ -229,12 +227,12 @@ void Level::loadLevel(char const* filepath, bool debugMode)
             tempBackgroundChage->indexInVec = i;
     
             if(debugMode){std::cout << "This color trigger can be found at index " << tempBackgroundChage->indexInVec << std::endl;}
-            this->backgroundChanges->push_back(*tempBackgroundChage);
+            this->backgroundChanges.push_back(*tempBackgroundChage);
     
             if(debugMode){std::cout << "Loaded color trigger successfully!" << std::endl;}
         }
     
-        if(debugMode){std::cout << "Loaded " << this->backgroundChanges->size() << " color trigger(s)!" << std::endl;}
+        if(debugMode){std::cout << "Loaded " << this->backgroundChanges.size() << " color trigger(s)!" << std::endl;}
         delete tempBackgroundChage;
     
         //The next 4 bytes are the number of gravity changes in the level, stored as an int
@@ -256,12 +254,12 @@ void Level::loadLevel(char const* filepath, bool debugMode)
             tempGravityChange->indexInVec = i;
     
             if(debugMode){std::cout << "This gravity trigger can be found at index " << tempGravityChange->indexInVec << std::endl;}
-            this->gravityChanges->push_back(*tempGravityChange);
+            this->gravityChanges.push_back(*tempGravityChange);
     
             if(debugMode){std::cout << "Loaded gravity trigger successfully!" << std::endl;}
         }
     
-        if(debugMode){std::cout << "Loaded " << this->gravityChanges->size() << " gravity trigger(s)!" << std::endl;}
+        if(debugMode){std::cout << "Loaded " << this->gravityChanges.size() << " gravity trigger(s)!" << std::endl;}
         delete tempGravityChange;
     
         //The next 4 bytes are the number of falling block fade effects, stored as an int
@@ -287,12 +285,12 @@ void Level::loadLevel(char const* filepath, bool debugMode)
             tempBlocksFall->indexInVec = i;
     
             if(debugMode){std::cout << "This falling block section can be found at index " << tempBlocksFall->indexInVec << std::endl;}
-            this->blocksFalls->push_back(*tempBlocksFall);
+            this->blocksFalls.push_back(*tempBlocksFall);
     
             if(debugMode){std::cout << "Loaded falling block section successfully!" << std::endl;}
         }
     
-        if(debugMode){std::cout << "Loaded " << this->blocksFalls->size() << " falling section(s)!" << std::endl;}
+        if(debugMode){std::cout << "Loaded " << this->blocksFalls.size() << " falling section(s)!" << std::endl;}
         delete tempBlocksFall;
     
         //The next 4 bytes are the number of rising block fade effects, stored as an int
@@ -318,12 +316,12 @@ void Level::loadLevel(char const* filepath, bool debugMode)
             tempBlocksRise->indexInVec = i;
     
             if(debugMode){std::cout << "This rising block section can be found at index " << tempBlocksRise->indexInVec << std::endl;}
-            this->blocksRises->push_back(*tempBlocksRise);
+            this->blocksRises.push_back(*tempBlocksRise);
     
             if(debugMode){std::cout << "Loaded rising block section successfully!" << std::endl;}
         }
     
-        if(debugMode){std::cout << "Loaded " << this->blocksRises->size() << " rising section(s)!" << std::endl;}
+        if(debugMode){std::cout << "Loaded " << this->blocksRises.size() << " rising section(s)!" << std::endl;}
         delete tempBlocksRise;
     }
 
@@ -409,7 +407,7 @@ BlockObject& Level::getBlockAtIndex(int index)
 {
     if(index < this->numBlockObjects)
     {
-        return this->blockObjects->at(index);
+        return this->blockObjects.at(index);
     }
     else
     {
@@ -422,7 +420,7 @@ BackgroundChange& Level::getBackgroundAtIndex(int index)
 {
     if(index < this->numBackgroundChanges)
     {
-        return this->backgroundChanges->at(index);
+        return this->backgroundChanges.at(index);
     }
     else
     {
@@ -436,7 +434,7 @@ GravityChange& Level::getGravAtIndex(int index)
 {
     if(index < this->numGravityChanges)
     {
-        return this->gravityChanges->at(index);
+        return this->gravityChanges.at(index);
     }
     else
     {
@@ -449,7 +447,7 @@ BlocksRise& Level::getRisingAtIndex(int index)
 {
     if(index < this->numBlocksRise)
     {
-        return this->blocksRises->at(index);
+        return this->blocksRises.at(index);
     }
     else
     {
@@ -462,7 +460,7 @@ BlocksFall& Level::getFallingAtIndex(int index)
 {
     if(index < this->numBlocksFall)
     {
-        return this->blocksFalls->at(index);
+        return this->blocksFalls.at(index);
     }
     else
     {
@@ -505,7 +503,7 @@ void Level::addBlock(BlockObject *toAdd)
 {
     toAdd->indexInVec = this->numBlockObjects;
     numBlockObjects++;
-    this->blockObjects->push_back(*toAdd);
+    this->blockObjects.push_back(*toAdd);
 }
 
 void Level::addBackground(BackgroundChange *toAdd)
@@ -513,28 +511,28 @@ void Level::addBackground(BackgroundChange *toAdd)
     toAdd->indexInVec = this->numBackgroundChanges;
     numBackgroundChanges++;
     toAdd->colorName = this->colorNames[toAdd->colorID];
-    this->backgroundChanges->push_back(*toAdd);
+    this->backgroundChanges.push_back(*toAdd);
 }
 
 void Level::addGravity(GravityChange *toAdd)
 {
     toAdd->indexInVec = this->numGravityChanges;
     numGravityChanges++;
-    this->gravityChanges->push_back(*toAdd);
+    this->gravityChanges.push_back(*toAdd);
 }
 
 void Level::addRising(BlocksRise *toAdd)
 {
     toAdd->indexInVec = this->numBlocksRise;
     numBlocksRise++;
-    this->blocksRises->push_back(*toAdd);
+    this->blocksRises.push_back(*toAdd);
 }
 
 void Level::addFalling(BlocksFall *toAdd)
 {
     toAdd->indexInVec = this->numBlocksFall;
     numBlocksFall++;
-    this->blocksFalls->push_back(*toAdd);
+    this->blocksFalls.push_back(*toAdd);
 }
 
 void Level::setEndPos(int endPos)
@@ -547,7 +545,7 @@ void Level::removeBlockAtIndex(int index)
 {
     if(index < this->numBlockObjects)
     {
-        this->blockObjects->erase(this->blockObjects->begin() + index);
+        this->blockObjects.erase(this->blockObjects.begin() + index);
         this->numBlockObjects--;
     }
 }
@@ -557,7 +555,7 @@ void Level::removeLastBlock()
 {
     if(this->numBlockObjects > 0)
     {
-        this->blockObjects->pop_back();
+        this->blockObjects.pop_back();
         this->numBlockObjects--;
     }
 }
@@ -566,7 +564,7 @@ void Level::removeBackgroundAtIndex(int index)
 {
     if(index < this->numBackgroundChanges)
     {
-        this->backgroundChanges->erase(this->backgroundChanges->begin() + index);
+        this->backgroundChanges.erase(this->backgroundChanges.begin() + index);
         this->numBackgroundChanges--;
     }
 }
@@ -575,7 +573,7 @@ void Level::removeLastBackground()
 {
     if(this->numBackgroundChanges > 0)
     {
-        this->backgroundChanges->pop_back();
+        this->backgroundChanges.pop_back();
         this->numBackgroundChanges--;
     }
 }
@@ -584,7 +582,7 @@ void Level::removeGravityAtIndex(int index)
 {
     if(index < this->numGravityChanges)
     {
-        this->gravityChanges->erase(this->gravityChanges->begin() + index);
+        this->gravityChanges.erase(this->gravityChanges.begin() + index);
         this->numGravityChanges--;
     }
 }
@@ -593,7 +591,7 @@ void Level::removeLastGravity()
 {
     if(this->numGravityChanges > 0)
     {
-        this->gravityChanges->pop_back();
+        this->gravityChanges.pop_back();
         this->numGravityChanges--;
     }
 }
@@ -602,7 +600,7 @@ void Level::removeRisingAtIndex(int index)
 {
     if(index < this->numBlocksRise)
     {
-        this->blocksRises->erase(this->blocksRises->begin() + index);
+        this->blocksRises.erase(this->blocksRises.begin() + index);
         this->numBlocksRise--;
     }
 }
@@ -611,7 +609,7 @@ void Level::removeLastRising()
 {
     if(this->numBlocksRise > 0)
     {
-        this->blocksRises->pop_back();
+        this->blocksRises.pop_back();
         this->numBlocksRise--;
     }
 }
@@ -620,7 +618,7 @@ void Level::removeFallingAtIndex(int index)
 {
     if(index < this->numBlocksFall)
     {
-        this->blocksFalls->erase(this->blocksFalls->begin() + index);
+        this->blocksFalls.erase(this->blocksFalls.begin() + index);
         this->numBlocksFall--;
     }
 }
@@ -629,12 +627,38 @@ void Level::removeLastFalling()
 {
     if(this->numBlocksFall > 0)
     {
-        this->blocksFalls->pop_back();
+        this->blocksFalls.pop_back();
         this->numBlocksFall--;
     }
 }
 
-void Level::printAllInfo()
+void Level::printSummary()
 {
-
+    std::cout << "======Level Summary======" << std::endl;
+    std::cout << "The level uses file format version " << formatVer << std::endl;
+    std::cout << "The level contains " << numBlockObjects << " blocks" << std::endl;
+    if(numBlockObjects > 0)
+    {
+        std::cout << "The first object is at X position " << (this->blockObjects[0].xPos) << std::endl;
+    }
+    std::cout << "The level ends at X position " << endPos << std::endl;
+    std::cout << "The level has " << numBackgroundChanges << " background changes" << std::endl;
+    if(customGraphicsEnabled)
+    {
+        std::cout << "The level has custom graphics enabled!" << std::endl;
+        if(customTextures.size() > 0)
+        {
+            std::cout << "The level uses the following custom textures: ";
+            for(int i = 0; i < customTextures.size(); i++)
+            {
+                std::cout << customTextures[i] << ", ";
+            }
+            std::cout << std::endl;
+        }
+    }
+    std::cout << "The level has " << numGravityChanges << " gravity changes" << std::endl;
+    std::cout << "The level has " << numBlocksRise << " rising block triggers" << std::endl;
+    std::cout << "The level has " << numBlocksFall << " falling block triggers" << std::endl;
+    std::cout << std::endl;
 }
+
