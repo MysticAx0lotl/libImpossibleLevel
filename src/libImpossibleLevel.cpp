@@ -111,7 +111,15 @@ Level::Level(bool debugMode)
 Level::Level(std::string filename, bool debugMode)
 {
     filename += "/level.dat";
-    this->loadLevel(filename.c_str(), debugMode);
+    if(debugMode){std::cout << "Attempting to read file " << filename.c_str() << std::endl;}
+    std::vector<unsigned char> levelChars = ReadAllBytes(filename.c_str()); //load file from path
+    this->loadLevel(levelChars, debugMode);
+}
+
+Level::Level(std::vector<unsigned char> levelChars, bool debugMode)
+{
+    if(debugMode){std::cout << "Attempting to read C char array" << std::endl;}
+    this->loadLevel(levelChars, debugMode);
 }
 
 //Destructor that serves no purpose right now
@@ -121,12 +129,10 @@ Level::~Level()
 }
 
 //Parse level data from the given filepath, called by constructor
-void Level::loadLevel(char const* filepath, bool debugMode)
+void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
 {
-    int currentByte = 0; //tracks the current byte in the file 
-    if(debugMode){std::cout << "Attempting to read file " << filepath << std::endl;}
-    std::vector<unsigned char> levelChars = ReadAllBytes(filepath); //load file from path, store in the heap
-    
+    int currentByte = 0; //tracks the current byte in the file
+
     //make sure we actually loaded data
     if (levelChars.size() == 0)
     {

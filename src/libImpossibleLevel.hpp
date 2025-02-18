@@ -120,8 +120,9 @@ class Level
     public:
         Level(bool);
         Level(std::string, bool);
+        Level(std::vector<unsigned char>, bool);
         ~Level();
-        void loadLevel(char const*, bool);
+        void loadLevel(std::vector<unsigned char>, bool);
         void saveLevel(std::string); //char const* is still needed in loadLevel since it passes that value to a lot of other functions, while saveLevel does not
 
         //get methods
