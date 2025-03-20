@@ -36,7 +36,7 @@ struct BackgroundChange
     int colorID;
     const char* colorName;
     bool customTexture;
-    const char* filePath;
+    std::string filePath;
     int indexInVec;
 };
 

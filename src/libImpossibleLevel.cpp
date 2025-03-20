@@ -66,6 +66,25 @@ short readShortFromJava(std::vector<unsigned char> &file, int startingOffset)
     return result;
 }
 
+
+//Reads a Java-formatted UTF8-string from a given file
+//This starts with a two-byte short determining how long the string is, which is followed by the string itself
+std::string readUTF8FromJava(std::vector<unsigned char> &file, int startingOffset)
+{
+    int currentOffset = startingOffset;
+    int strLen = readShortFromJava(file, currentOffset);
+    std::string result;
+
+    currentOffset += 2;
+
+    for(int i = currentOffset; i < (currentOffset + strLen); i++)
+    {
+        result += file[i];
+    }
+
+    return result;
+}
+
 //Java handles evereything in big-Endian
 //Since TIG's level editor is written in java, ints and shorts are read as big-Endian
 //They must be converted to little-Endian after being written to be accepted by the game
@@ -82,6 +101,13 @@ void writeJavaShort(std::ofstream& datafile, short sourceShort)
 {
     unsigned short swapSource = static_cast<unsigned short>((sourceShort >> 8) | (sourceShort << 8));
     datafile.write(reinterpret_cast<const char*>(&swapSource), sizeof(swapSource));
+}
+
+//Java's UTF8 format appends the string length to the beginning of the data
+void writeJavaUTF8(std::ofstream& datafile, std::string sourceStr)
+{
+    writeJavaShort(datafile, sourceStr.size());
+    datafile.write(sourceStr.c_str(), sourceStr.size());
 }
 
 //Endianess doesn't matter for bools or char arrays, this function handles exporting those
@@ -215,13 +241,21 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
             currentByte += 4;
     
             tempBackgroundChage->customTexture = static_cast<bool>(levelChars.at(currentByte));
-            currentByte++; //WILL CURRENTLY BREAK HERE IF CUSTOM GRAPHICS ARE ENABLED
+            currentByte++;
 
             if(tempBackgroundChage->customTexture)
             {
-                if(debugMode){std::cout << "Custom background support is currently a stub" << std::endl;}
+                if(debugMode){std::cout << "Attempting to read custom texture" << std::endl;}
 
-                //DO NOT FORGET TO ADD THE REQUESTED FILE TO customTextures!!!!!!!
+                tempBackgroundChange->filePath = readUTF8FromJava(dataOut, currentByte);
+
+                 //The short int at currentByte represents how many characters are in the filePath
+                currentByte += (readShortFromJava(dataOut, currentByte) + 2);
+
+                if(debugMode){std::cout << "This backgroundchange requests the texture " << tempBackgroundChage->filePath << std::endl;}
+                if(debugMode){std::cout << "Make sure it's defined in an atlas file!" << std::endl;}
+                
+                customTextures.push_back(tempBackgroundChage->filePath);
             }
             else
             {
@@ -366,12 +400,7 @@ void Level::saveLevel(std::string filepath)
         writeOtherData(dataOut, tempCon.customTexture);
         if(tempCon.customTexture)
         {
-            short strLen = sizeof(tempCon.filePath);
-            writeJavaShort(dataOut, strLen);
-            for(int i = 0; i < sizeof(tempCon.filePath); i++)
-            {
-                writeOtherData(dataOut, tempCon.filePath[i]);
-            }
+            writeJavaUTF8(dataOut, tempCon.filePath);
         }
         else
         {
@@ -518,6 +547,10 @@ void Level::addBackground(BackgroundChange *toAdd)
     numBackgroundChanges++;
     toAdd->colorName = this->colorNames[toAdd->colorID];
     this->backgroundChanges.push_back(*toAdd);
+    if(toAdd->customTexture)
+    {
+        this->customGraphicsEnabled = true;
+    }
 }
 
 void Level::addGravity(GravityChange *toAdd)
