@@ -232,48 +232,48 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         //Assuming all background changes don't use custom graphics
         //Each background change takes up 9 bytes (same math as before, 2 ints + 1 bool)
         //Therefore the next (9 * numBgSwitch) bytes are background changes
-        BackgroundChange *tempBackgroundChage = new BackgroundChange;
+        BackgroundChange *tempBackgroundChange = new BackgroundChange;
     
         for(int i = 0; i < this->numBackgroundChanges; i++)
         {
-            tempBackgroundChage->xPos = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current color trigger's xpos is " << tempBackgroundChage->xPos << std::endl;};
+            tempBackgroundChange->xPos = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current color trigger's xpos is " << tempBackgroundChange->xPos << std::endl;};
             currentByte += 4;
     
-            tempBackgroundChage->customTexture = static_cast<bool>(levelChars.at(currentByte));
+            tempBackgroundChange->customTexture = static_cast<bool>(levelChars.at(currentByte));
             currentByte++;
 
-            if(tempBackgroundChage->customTexture)
+            if(tempBackgroundChange->customTexture)
             {
                 if(debugMode){std::cout << "Attempting to read custom texture" << std::endl;}
 
-                tempBackgroundChange->filePath = readUTF8FromJava(dataOut, currentByte);
+                tempBackgroundChange->filePath = readUTF8FromJava(levelChars, currentByte);
 
                  //The short int at currentByte represents how many characters are in the filePath
-                currentByte += (readShortFromJava(dataOut, currentByte) + 2);
+                currentByte += (readShortFromJava(levelChars, currentByte) + 2);
 
-                if(debugMode){std::cout << "This backgroundchange requests the texture " << tempBackgroundChage->filePath << std::endl;}
+                if(debugMode){std::cout << "This backgroundchange requests the texture " << tempBackgroundChange->filePath << std::endl;}
                 if(debugMode){std::cout << "Make sure it's defined in an atlas file!" << std::endl;}
                 
-                customTextures.push_back(tempBackgroundChage->filePath);
+                customTextures.push_back(tempBackgroundChange->filePath);
             }
             else
             {
-                tempBackgroundChage->colorID = readIntFromJava(levelChars, currentByte);
-                if(debugMode){std::cout << "The current color type is " << this->colorNames[tempBackgroundChage->colorID] << std::endl;}
+                tempBackgroundChange->colorID = readIntFromJava(levelChars, currentByte);
+                if(debugMode){std::cout << "The current color type is " << this->colorNames[tempBackgroundChange->colorID] << std::endl;}
                 currentByte += 4;
             }
     
-            tempBackgroundChage->indexInVec = i;
+            tempBackgroundChange->indexInVec = i;
     
-            if(debugMode){std::cout << "This color trigger can be found at index " << tempBackgroundChage->indexInVec << std::endl;}
-            this->backgroundChanges.push_back(*tempBackgroundChage);
+            if(debugMode){std::cout << "This color trigger can be found at index " << tempBackgroundChange->indexInVec << std::endl;}
+            this->backgroundChanges.push_back(*tempBackgroundChange);
     
             if(debugMode){std::cout << "Loaded color trigger successfully!" << std::endl;}
         }
     
         if(debugMode){std::cout << "Loaded " << this->backgroundChanges.size() << " color trigger(s)!" << std::endl;}
-        delete tempBackgroundChage;
+        delete tempBackgroundChange;
     
         //The next 4 bytes are the number of gravity changes in the level, stored as an int
         if(debugMode){std::cout << "Attempting to read gravity change count" << std::endl;}
