@@ -123,15 +123,15 @@ class Level
         Level(std::vector<unsigned char>, bool);
         ~Level();
         void loadLevel(std::vector<unsigned char>, bool);
-        void saveLevel(std::string); //char const* is still needed in loadLevel since it passes that value to a lot of other functions, while saveLevel does not
+        void saveLevel(std::string);
 
         //get methods
         int getFormatVer();
-        BlockObject& getBlockAtIndex(int);
-        BackgroundChange& getBackgroundAtIndex(int);
-        GravityChange& getGravAtIndex(int);
-        BlocksRise& getRisingAtIndex(int);
-        BlocksFall& getFallingAtIndex(int);
+        BlockObject* getBlockAtIndex(int);
+        BackgroundChange* getBackgroundAtIndex(int);
+        GravityChange* getGravAtIndex(int);
+        BlocksRise* getRisingAtIndex(int);
+        BlocksFall* getFallingAtIndex(int);
         int getEndPos();
         int getBlockCount();
         int getBackgroundCount();
@@ -178,6 +178,7 @@ class Level
         int formatVer;
         const char* blockNames[3] = {"Platform", "Spike", "Pit"}; 
         const char* colorNames[6] = {"blue", "yellow", "green", "violet", "pink", "black"};
+        const std::string tig_filepath = "/level.dat";
 };
 
 #endif

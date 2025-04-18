@@ -2,9 +2,9 @@
 
 //Source: https://codereview.stackexchange.com/a/22907
 //modified to convert to and then return an unsigned char vector instead of a signed one
-static std::vector<unsigned char> ReadAllBytes(char const* filename)
+static std::vector<unsigned char> ReadAllBytes(const std::string& filename)
 {
-    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
+    std::ifstream ifs(filename.c_str(), std::ios::binary|std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
     if (pos == 0) {
@@ -121,14 +121,14 @@ Level::Level(bool debugMode)
 {
     if(debugMode){std::cout << "No filepath was given, a blank level will be generated..." << std::endl;}
 
-    numBlockObjects = 0;
-    numBackgroundChanges = 0;
-    numGravityChanges = 0;
-    numBlocksRise = 0;
-    numBlocksFall = 0;
-    endPos = 3015;
-    customGraphicsEnabled = false;
-    formatVer = 0;
+    this->numBlockObjects = 0;
+    this->numBackgroundChanges = 0;
+    this->numGravityChanges = 0;
+    this->numBlocksRise = 0;
+    this->numBlocksFall = 0;
+    this->endPos = 3015;
+    this->customGraphicsEnabled = false;
+    this->formatVer = 0;
 
     if(debugMode){std::cout << "Blank level generated!" << std::endl;}
 }
@@ -136,10 +136,29 @@ Level::Level(bool debugMode)
 //Constructor that calls loadDataFromFile
 Level::Level(std::string filename, bool debugMode)
 {
-    filename += "/level.dat";
-    if(debugMode){std::cout << "Attempting to read file " << filename.c_str() << std::endl;}
-    std::vector<unsigned char> levelChars = ReadAllBytes(filename.c_str()); //load file from path
-    this->loadLevel(levelChars, debugMode);
+    filename += this->tig_filepath;
+    if(std::filesystem::exists(filename))
+    {
+        if(debugMode){std::cout << "Attempting to read file " << filename.c_str() << std::endl;}
+        std::vector<unsigned char> levelChars = ReadAllBytes(filename.c_str()); //load file from path
+        this->loadLevel(levelChars, debugMode);
+    }
+    else
+    {
+        if(debugMode){std::cout << filename.c_str() << " does not seem to exist. Generating a blank level instead..." << std::endl;}
+        
+        //copied verbatim from Level::Level(bool)
+        this->numBlockObjects = 0;
+        this->numBackgroundChanges = 0;
+        this->numGravityChanges = 0;
+        this->numBlocksRise = 0;
+        this->numBlocksFall = 0;
+        this->endPos = 3015;
+        this->customGraphicsEnabled = false;
+        this->formatVer = 0;
+    
+        if(debugMode){std::cout << "Blank level generated!" << std::endl;}
+    }
 }
 
 Level::Level(std::vector<unsigned char> levelChars, bool debugMode)
@@ -375,7 +394,7 @@ void Level::saveLevel(std::string filepath)
         std::filesystem::create_directory(filepath);
     }
 
-    filepath += "/level.dat";
+    filepath += this->tig_filepath;
 
     std::ofstream dataOut;
     dataOut.open(filepath.c_str(), std::ios_base::binary | std::ios_base::out);
@@ -385,7 +404,7 @@ void Level::saveLevel(std::string filepath)
     BlockObject temp;
     for(int i = 0; i < this->numBlockObjects; i++)
     {
-        temp = this->getBlockAtIndex(i);
+        temp = *this->getBlockAtIndex(i);
         writeOtherData(dataOut, temp.objType);
         writeJavaInt(dataOut, temp.xPos);
         writeJavaInt(dataOut, temp.yPos);
@@ -395,7 +414,7 @@ void Level::saveLevel(std::string filepath)
     BackgroundChange tempCon;
     for(int i = 0; i < numBackgroundChanges; i++)
     {
-        tempCon = this->getBackgroundAtIndex(i);
+        tempCon = *this->getBackgroundAtIndex(i);
         writeJavaInt(dataOut, tempCon.xPos);
         writeOtherData(dataOut, tempCon.customTexture);
         if(tempCon.customTexture)
@@ -411,14 +430,14 @@ void Level::saveLevel(std::string filepath)
     GravityChange tempGrav;
     for(int i = 0; i < this->numGravityChanges; i++)
     {
-        tempGrav = this->getGravAtIndex(i);
+        tempGrav = *this->getGravAtIndex(i);
         writeJavaInt(dataOut, tempGrav.xPos);
     }
     writeJavaInt(dataOut, this->numBlocksRise);
     BlocksRise tempRising;
     for(int i = 0; i < this->numBlocksRise; i++)
     {
-        tempRising = this->getRisingAtIndex(i);
+        tempRising = *this->getRisingAtIndex(i);
         writeJavaInt(dataOut, tempRising.startX);
         writeJavaInt(dataOut, tempRising.endX);
     }
@@ -426,7 +445,7 @@ void Level::saveLevel(std::string filepath)
     BlocksFall tempFalling;
     for(int i = 0; i < this->numBlocksFall; i++)
     {
-        tempFalling = this->getFallingAtIndex(i);
+        tempFalling = *this->getFallingAtIndex(i);
         writeJavaInt(dataOut, tempFalling.startX);
         writeJavaInt(dataOut, tempFalling.startX);
     }
@@ -438,70 +457,54 @@ int Level::getFormatVer()
     return this->formatVer;
 }
 
-BlockObject& Level::getBlockAtIndex(int index)
+BlockObject* Level::getBlockAtIndex(int index)
 {
     if(index < this->numBlockObjects)
     {
-        return this->blockObjects.at(index);
+        return &this->blockObjects[index];
     }
-    else
-    {
-        static BlockObject nullObj = {0, 0, 0, 0};
-        return nullObj;
-    }
+    
+    return nullptr;
 }
 
-BackgroundChange& Level::getBackgroundAtIndex(int index)
+BackgroundChange* Level::getBackgroundAtIndex(int index)
 {
     if(index < this->numBackgroundChanges)
     {
-        return this->backgroundChanges.at(index);
-    }
-    else
-    {
-        static BackgroundChange nullObj = {0, 0, "null", false, "null", 0};
-        return nullObj;
+        return &this->backgroundChanges[index];
     }
 
+    return nullptr;
 }
 
-GravityChange& Level::getGravAtIndex(int index)
+GravityChange* Level::getGravAtIndex(int index)
 {
     if(index < this->numGravityChanges)
     {
-        return this->gravityChanges.at(index);
+        return &this->gravityChanges[index];
     }
-    else
-    {
-        static GravityChange nullObj = {0, 0};
-        return nullObj;
-    }
+
+    return nullptr;
 }
 
-BlocksRise& Level::getRisingAtIndex(int index)
+BlocksRise* Level::getRisingAtIndex(int index)
 {
     if(index < this->numBlocksRise)
     {
-        return this->blocksRises.at(index);
+        return &this->blocksRises[index];
     }
-    else
-    {
-        static BlocksRise nullObj = {0, 0, 0};
-        return nullObj;
-    }
+
+    return nullptr;
 }
 
-BlocksFall& Level::getFallingAtIndex(int index)
+BlocksFall* Level::getFallingAtIndex(int index)
 {
     if(index < this->numBlocksFall)
     {
-        return this->blocksFalls.at(index);
+        return &this->blocksFalls[index];
     }
-    else
-    {
-        static BlocksFall nullObj = {0, 0, 0};
-        return nullObj;
-    }
+
+    return nullptr;
 }
 
 int Level::getEndPos()
