@@ -176,9 +176,9 @@ class Level
         int endPos;
         bool customGraphicsEnabled;
         int formatVer;
-        const char* blockNames[3] = {"Platform", "Spike", "Pit"}; 
-        const char* colorNames[6] = {"blue", "yellow", "green", "violet", "pink", "black"};
-        const std::string tig_filepath = "/level.dat";
+        static inline const char* blockNames[3] = {"Platform", "Spike", "Pit"}; 
+        static inline const char* colorNames[6] = {"blue", "yellow", "green", "violet", "pink", "black"};
+        static inline const std::string tig_filepath = "/level.dat";
 };
 
 #endif

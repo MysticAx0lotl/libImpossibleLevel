@@ -1,28 +1,15 @@
 #include "libImpossibleLevel.hpp"
 
-//Source: https://codereview.stackexchange.com/a/22907
-//modified to convert to and then return an unsigned char vector instead of a signed one
+//Loads a binary into a vector
 static std::vector<unsigned char> ReadAllBytes(const std::string& filename)
 {
-    std::ifstream ifs(filename.c_str(), std::ios::binary|std::ios::ate);
-    std::ifstream::pos_type pos = ifs.tellg();
-
-    if (pos == 0) {
+    std::ifstream file(filename, std::ios::binary);
+    if (!file.is_open())
+    {
         return std::vector<unsigned char>{};
     }
 
-    std::vector<char>  result(pos);
-
-    ifs.seekg(0, std::ios::beg);
-    ifs.read(&result[0], pos);
-
-    std::vector<unsigned char> returnVal(pos);
-    for(int i = 0; i < result.size(); i++)
-    {
-        returnVal[i] = static_cast<unsigned char>(result[i]);
-    }
-
-    return returnVal;
+    return std::vector<unsigned char>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 }
 
 //Java handles evereything in big-Endian

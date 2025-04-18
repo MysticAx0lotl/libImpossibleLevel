@@ -176,3 +176,31 @@ int swapShortEndians(short value)
  
     return result; 
 } */
+
+//Source: https://codereview.stackexchange.com/a/22907
+//modified to convert to and then return an unsigned char vector instead of a signed one
+
+/*
+static std::vector<unsigned char> ReadAllBytes(const std::string& filename)
+{
+    std::ifstream ifs(filename.c_str(), std::ios::binary|std::ios::ate);
+    std::ifstream::pos_type pos = ifs.tellg();
+
+    if (pos == 0) {
+        return std::vector<unsigned char>{};
+    }
+
+    std::vector<char>  result(pos);
+
+    ifs.seekg(0, std::ios::beg);
+    ifs.read(&result[0], pos);
+
+    std::vector<unsigned char> returnVal(pos);
+    for(int i = 0; i < result.size(); i++)
+    {
+        returnVal[i] = static_cast<unsigned char>(result[i]);
+    }
+
+    return returnVal;
+}
+*/

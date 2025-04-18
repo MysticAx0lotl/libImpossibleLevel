@@ -403,3 +403,4 @@ src/a.exe
 /.vscode
 /.vscode
 src/a.out
+*.dat
