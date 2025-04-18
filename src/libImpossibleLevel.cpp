@@ -362,7 +362,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         //Therefore the next (8 * numRisingBlocks) bytes are Rising Blocks data
         BlocksRise *tempBlocksRise = new BlocksRise;
     
-        for(int i = 0; i < this->numBlocksFall; i++)
+        for(int i = 0; i < this->numBlocksRise; i++)
         {
             tempBlocksRise->startX = readIntFromJava(levelChars, currentByte);
             if(debugMode){std::cout << "The current rising block startX is " << tempBlocksRise->startX << std::endl;}
@@ -400,54 +400,49 @@ void Level::saveLevel(std::string filepath)
     dataOut.open(filepath.c_str(), std::ios_base::binary | std::ios_base::out);
     writeJavaInt(dataOut, this->formatVer);
     writeOtherData(dataOut, this->customGraphicsEnabled);
+
     writeJavaShort(dataOut, this->numBlockObjects);
-    BlockObject temp;
     for(int i = 0; i < this->numBlockObjects; i++)
     {
-        temp = *this->getBlockAtIndex(i);
-        writeOtherData(dataOut, temp.objType);
-        writeJavaInt(dataOut, temp.xPos);
-        writeJavaInt(dataOut, temp.yPos);
+        writeOtherData(dataOut, this->getBlockAtIndex(i)->objType);
+        writeJavaInt(dataOut, this->getBlockAtIndex(i)->xPos);
+        writeJavaInt(dataOut, this->getBlockAtIndex(i)->yPos);
     }
     writeJavaInt(dataOut, endPos);
+
     writeJavaInt(dataOut, numBackgroundChanges);
-    BackgroundChange tempCon;
     for(int i = 0; i < numBackgroundChanges; i++)
     {
-        tempCon = *this->getBackgroundAtIndex(i);
-        writeJavaInt(dataOut, tempCon.xPos);
-        writeOtherData(dataOut, tempCon.customTexture);
-        if(tempCon.customTexture)
+        writeJavaInt(dataOut, this->getBackgroundAtIndex(i)->xPos);
+        writeOtherData(dataOut, this->getBackgroundAtIndex(i)->customTexture);
+        if(this->getBackgroundAtIndex(i)->customTexture)
         {
-            writeJavaUTF8(dataOut, tempCon.filePath);
+            writeJavaUTF8(dataOut, this->getBackgroundAtIndex(i)->filePath);
         }
         else
         {
-            writeJavaInt(dataOut, tempCon.colorID);
+            writeJavaInt(dataOut, this->getBackgroundAtIndex(i)->colorID);
         }
     }
+
     writeJavaInt(dataOut, this->numGravityChanges);
-    GravityChange tempGrav;
     for(int i = 0; i < this->numGravityChanges; i++)
     {
-        tempGrav = *this->getGravAtIndex(i);
-        writeJavaInt(dataOut, tempGrav.xPos);
+        writeJavaInt(dataOut, this->getGravAtIndex(i)->xPos);
     }
-    writeJavaInt(dataOut, this->numBlocksRise);
-    BlocksRise tempRising;
-    for(int i = 0; i < this->numBlocksRise; i++)
-    {
-        tempRising = *this->getRisingAtIndex(i);
-        writeJavaInt(dataOut, tempRising.startX);
-        writeJavaInt(dataOut, tempRising.endX);
-    }
+
     writeJavaInt(dataOut, this->numBlocksFall);
-    BlocksFall tempFalling;
     for(int i = 0; i < this->numBlocksFall; i++)
     {
-        tempFalling = *this->getFallingAtIndex(i);
-        writeJavaInt(dataOut, tempFalling.startX);
-        writeJavaInt(dataOut, tempFalling.startX);
+        writeJavaInt(dataOut, this->getFallingAtIndex(i)->startX);
+        writeJavaInt(dataOut, this->getFallingAtIndex(i)->endX);
+    }
+
+    writeJavaInt(dataOut, this->numBlocksRise);
+    for(int i = 0; i < this->numBlocksRise; i++)
+    {
+        writeJavaInt(dataOut, this->getRisingAtIndex(i)->startX);
+        writeJavaInt(dataOut, this->getRisingAtIndex(i)->endX);
     }
 }
 

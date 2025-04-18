@@ -7,5 +7,7 @@ int main()
     
     leveldata.printSummary();
 
+    leveldata.saveLevel("test2.lvl");
+
     return 0;
 }
