@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
+#include <algorithm>
 
 /*
 BlockObj: short for "block object"
@@ -158,6 +159,10 @@ class Level
         void removeLastRising();
         void removeFallingAtIndex(int);
         void removeLastFalling();
+
+        //housekeeping methods
+        void mergeAdjacentPits();
+        void sortBlocks();
 
         void printSummary();
 

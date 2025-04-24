@@ -103,6 +103,12 @@ void writeOtherData(std::ofstream& datafile, unsigned char data)
     datafile.write(reinterpret_cast<const char*>(&data), sizeof(data));
 }
 
+//source: https://stackoverflow.com/questions/4892680/sorting-a-vector-of-structs
+bool compareByPos(const BlockObject &a, const BlockObject &b)
+{
+    return a.xPos < b.xPos;
+}
+
 //Constructor that generates a blank level if no filepath is given
 Level::Level(bool debugMode)
 {
@@ -654,6 +660,34 @@ void Level::removeLastFalling()
         this->blocksFalls.pop_back();
         this->numBlocksFall--;
     }
+}
+
+void Level::mergeAdjacentPits()
+{
+    sortBlocks();
+
+    for(int i = 0; i < numBlockObjects; i++)
+    {
+        if(blockObjects[i].objType == 2)
+        {
+            if(true){std::cout << "found pit at xpos " << blockObjects[i].xPos << std::endl;}
+            for(int j = i; j < numBlockObjects; j++)
+            {
+                if(blockObjects[j].objType == 2 && blockObjects[j].xPos == (blockObjects[i].yPos + 30))
+                {
+                    if(true){std::cout << "found adj pit at xpos " << blockObjects[j].xPos << std::endl;}
+                    blockObjects[i].yPos = blockObjects[j].yPos;
+                    removeBlockAtIndex(j);
+                }
+            }
+        }
+    }
+
+}
+
+void Level::sortBlocks()
+{
+    std::sort(blockObjects.begin(), blockObjects.end(), compareByPos);
 }
 
 void Level::printSummary()
