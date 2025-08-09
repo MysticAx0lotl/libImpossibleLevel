@@ -181,7 +181,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     else
     {
         //validate preamble exists
-        if(levelChars.size() > 7)
+        if(levelChars.size() < 7)
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -212,7 +212,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         //One block uses nine bytes of data (bool + 2 ints = 1 + 2(4) = 9 bytes)
         //the next (9 * numBlocks) bytes are the data for each block
 
-        if(levelChars.size() > (currentByte + (9 * numBlockObjects)))
+        if(levelChars.size() < (currentByte + (9 * numBlockObjects)))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -246,7 +246,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         if(debugMode){std::cout << "Loaded " << this->blockObjects.size() << " object(s)!" << std::endl;}
         delete tempBlockObject;
         
-        if(levelChars.size() > (currentByte + 8))
+        if(levelChars.size() < (currentByte + 8))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -267,7 +267,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         //Assuming all background changes don't use custom graphics
         //Each background change takes up 9 bytes (same math as before, 2 ints + 1 bool)
         //Therefore the next (9 * numBgSwitch) bytes are background changes
-        if(levelChars.size() > (currentByte + (9 * this->numBackgroundChanges)))
+        if(levelChars.size() < (currentByte + (9 * this->numBackgroundChanges)))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -318,7 +318,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         delete tempBackgroundChange;
     
         //The next 4 bytes are the number of gravity changes in the level, stored as an int
-        if(levelChars.size() > (currentByte + 4))
+        if(levelChars.size() < (currentByte + 4))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -332,7 +332,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     
         //Each gravity change only takes up 4 bytes (1 int = 4 bytes)
         //Therefore, the next (4 * numGravitySwitch) bytes are gravity switch data
-        if(levelChars.size() > (currentByte + (4 * this->numGravityChanges)))
+        if(levelChars.size() < (currentByte + (4 * this->numGravityChanges)))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -359,7 +359,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         delete tempGravityChange;
     
         //The next 4 bytes are the number of falling block fade effects, stored as an int
-        if(levelChars.size() > (currentByte + 4))
+        if(levelChars.size() < (currentByte + 4))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -373,7 +373,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     
         //Each falling block object takes up 8 bytes (2 ints = 2 * 4 bytes = 8 bytes)
         //Therefore the next (8 * numFallingBlocks) bytes are Falling Blocks data
-        if(levelChars.size() > (currentByte + (8 * this->numBlocksFall)))
+        if(levelChars.size() < (currentByte + (8 * this->numBlocksFall)))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -404,7 +404,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         delete tempBlocksFall;
     
         //The next 4 bytes are the number of rising block fade effects, stored as an int
-        if(levelChars.size() > (currentByte + 4))
+        if(levelChars.size() < (currentByte + 4))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
@@ -418,7 +418,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
 
         //Each rising block object takes up 8 bytes (2 ints = 2 * 4 bytes = 8 bytes)
         //Therefore the next (8 * numRisingBlocks) bytes are Rising Blocks data
-        if(levelChars.size() > (currentByte + (8 * this->numBlocksRise)))
+        if(levelChars.size() < (currentByte + (8 * this->numBlocksRise)))
         {
             if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
             loadedSuccessfully = false;
