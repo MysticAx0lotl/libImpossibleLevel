@@ -139,6 +139,7 @@ class Level
         int getGravityCount();
         int getRisingCount();
         int getFallingCount();
+        bool getLoadedSuccessfully();
 
         //set methods
         void addBlock(BlockObject*);

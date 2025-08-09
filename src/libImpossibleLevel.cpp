@@ -598,6 +598,11 @@ int Level::getFallingCount()
     return this->numBlocksFall;
 }
 
+bool Level::getLoadedSuccessfully()
+{
+    return this->loadedSuccessfully;
+}
+
 void Level::addBlock(BlockObject *toAdd)
 {
     toAdd->indexInVec = this->numBlockObjects;
