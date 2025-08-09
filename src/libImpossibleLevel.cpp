@@ -151,6 +151,7 @@ Level::Level(std::string filename, bool debugMode)
         this->formatVer = 0;
     
         if(debugMode){std::cout << "Blank level generated!" << std::endl;}
+        loadedSuccessfully = true;
     }
 }
 
@@ -179,6 +180,13 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     }
     else
     {
+        //validate preamble exists
+        if(levelChars.size() > 7)
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
         //first four bytes in the file are the format version, stored as an int
         if(debugMode){std::cout << "Getting file format version..." << std::endl;}
         this->formatVer = readIntFromJava(levelChars, currentByte);
@@ -203,6 +211,14 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
 
         //One block uses nine bytes of data (bool + 2 ints = 1 + 2(4) = 9 bytes)
         //the next (9 * numBlocks) bytes are the data for each block
+
+        if(levelChars.size() > (currentByte + (9 * numBlockObjects)))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         BlockObject *tempBlockObject = new BlockObject;
     
         for(int i = 0; i < this->numBlockObjects; i++)
@@ -229,7 +245,14 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     
         if(debugMode){std::cout << "Loaded " << this->blockObjects.size() << " object(s)!" << std::endl;}
         delete tempBlockObject;
-    
+        
+        if(levelChars.size() > (currentByte + 8))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         //the next four bytes are the x position of the end of the level, stored as an int
         this->endPos = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "End wall is located at X position " << this->endPos << std::endl;}
@@ -244,6 +267,13 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         //Assuming all background changes don't use custom graphics
         //Each background change takes up 9 bytes (same math as before, 2 ints + 1 bool)
         //Therefore the next (9 * numBgSwitch) bytes are background changes
+        if(levelChars.size() > (currentByte + (9 * this->numBackgroundChanges)))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         BackgroundChange *tempBackgroundChange = new BackgroundChange;
     
         for(int i = 0; i < this->numBackgroundChanges; i++)
@@ -288,6 +318,13 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         delete tempBackgroundChange;
     
         //The next 4 bytes are the number of gravity changes in the level, stored as an int
+        if(levelChars.size() > (currentByte + 4))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         if(debugMode){std::cout << "Attempting to read gravity change count" << std::endl;}
         this->numGravityChanges = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << this->numGravityChanges << " gravity changes in the level" << std::endl;}
@@ -295,6 +332,13 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     
         //Each gravity change only takes up 4 bytes (1 int = 4 bytes)
         //Therefore, the next (4 * numGravitySwitch) bytes are gravity switch data
+        if(levelChars.size() > (currentByte + (4 * this->numGravityChanges)))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         GravityChange *tempGravityChange = new GravityChange;
     
         for(int i = 0; i < this->numGravityChanges; i++)
@@ -315,6 +359,13 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         delete tempGravityChange;
     
         //The next 4 bytes are the number of falling block fade effects, stored as an int
+        if(levelChars.size() > (currentByte + 4))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         if(debugMode){std::cout << "Attempting to read falling block count" << std::endl;}
         this->numBlocksFall = readIntFromJava(levelChars, currentByte);
         if(debugMode){std::cout << "There are " << this->numBlocksFall << " falling blocks in the level" << std::endl;}
@@ -322,6 +373,13 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     
         //Each falling block object takes up 8 bytes (2 ints = 2 * 4 bytes = 8 bytes)
         //Therefore the next (8 * numFallingBlocks) bytes are Falling Blocks data
+        if(levelChars.size() > (currentByte + (8 * this->numBlocksFall)))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         BlocksFall *tempBlocksFall = new BlocksFall;
     
         for(int i = 0; i < this->numBlocksFall; i++)
@@ -346,13 +404,27 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
         delete tempBlocksFall;
     
         //The next 4 bytes are the number of rising block fade effects, stored as an int
+        if(levelChars.size() > (currentByte + 4))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         if(debugMode){std::cout << "Attempting to read rising block count" << std::endl;}
         this->numBlocksRise = readIntFromJava(levelChars, currentByte);
-        if(debugMode){std::cout << "There are " << numBlocksRise << " rising blocks in the level" << std::endl;}
+        if(debugMode){std::cout << "There are " << this->numBlocksRise << " rising blocks in the level" << std::endl;}
         currentByte += 4;
 
         //Each rising block object takes up 8 bytes (2 ints = 2 * 4 bytes = 8 bytes)
         //Therefore the next (8 * numRisingBlocks) bytes are Rising Blocks data
+        if(levelChars.size() > (currentByte + (8 * this->numBlocksRise)))
+        {
+            if(debugMode){std::cout << "ERROR: Reached EOF too soon" << std::endl;}
+            loadedSuccessfully = false;
+            return;
+        }
+
         BlocksRise *tempBlocksRise = new BlocksRise;
     
         for(int i = 0; i < this->numBlocksRise; i++)
@@ -378,6 +450,7 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
     }
 
     if(debugMode){std::cout << "Loaded entire level!" << std::endl;}
+    loadedSuccessfully = true;
 }
 
 void Level::saveLevel(std::string filepath)
@@ -673,7 +746,7 @@ void Level::mergeAdjacentPits()
             if(true){std::cout << "found pit at xpos " << blockObjects[i].xPos << std::endl;}
             for(int j = i; j < numBlockObjects; j++)
             {
-                if(blockObjects[j].objType == 2 && blockObjects[j].xPos == (blockObjects[i].yPos + 30))
+                if(blockObjects[j].objType == 2 && ((blockObjects[j].xPos == blockObjects[i].yPos + 30) || (blockObjects[j].yPos > blockObjects[i].xPos)))
                 {
                     if(true){std::cout << "found adj pit at xpos " << blockObjects[j].xPos << std::endl;}
                     blockObjects[i].yPos = blockObjects[j].yPos;

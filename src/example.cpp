@@ -6,8 +6,8 @@ int main()
     Level leveldata("test.lvl", true);
     
     BlockObject* test1 = new BlockObject;
-    test1->xPos = 650;
-    test1->yPos = 590;
+    test1->xPos = 590;
+    test1->yPos = 650;
     test1->objType = 02;
 
     BlockObject* test2 = new BlockObject;
