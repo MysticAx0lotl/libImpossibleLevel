@@ -754,12 +754,12 @@ void Level::mergeAdjacentPits(bool hitLastTime)
         {
             if(blockObjects[i].objType == 2)
             {
-                if(true){std::cout << "found pit at xpos " << blockObjects[i].xPos << std::endl;}
+                //if(debugMode){std::cout << "found pit at xpos " << blockObjects[i].xPos << std::endl;}
                 for(int j = i+1; j < numBlockObjects; j++)
                 {
                     if(blockObjects[j].objType == 2 && ((blockObjects[j].xPos == blockObjects[i].yPos) || (blockObjects[j].xPos < blockObjects[i].yPos)))
                     {
-                        if(true){std::cout << "found adj pit at xpos " << blockObjects[j].xPos << std::endl;}
+                        //if(debugMode){std::cout << "found adj pit at xpos " << blockObjects[j].xPos << std::endl;}
                         blockObjects[i].yPos = blockObjects[j].yPos;
                         removeBlockAtIndex(j);
                         hitThisTime = true;
