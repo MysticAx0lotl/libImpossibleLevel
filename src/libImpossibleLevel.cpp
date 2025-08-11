@@ -462,6 +462,8 @@ void Level::saveLevel(std::string filepath)
 
     filepath += this->tig_filepath;
 
+    this->mergeAdjacentPits(false);
+
     std::ofstream dataOut;
     dataOut.open(filepath.c_str(), std::ios_base::binary | std::ios_base::out);
     writeJavaInt(dataOut, this->formatVer);
@@ -740,25 +742,33 @@ void Level::removeLastFalling()
     }
 }
 
-void Level::mergeAdjacentPits()
+void Level::mergeAdjacentPits(bool hitLastTime)
 {
     sortBlocks();
 
-    for(int i = 0; i < numBlockObjects; i++)
+    bool hitThisTime = false;
+
+    if(hitLastTime == true)
     {
-        if(blockObjects[i].objType == 2)
+        for(int i = 0; i < numBlockObjects; i++)
         {
-            if(true){std::cout << "found pit at xpos " << blockObjects[i].xPos << std::endl;}
-            for(int j = i; j < numBlockObjects; j++)
+            if(blockObjects[i].objType == 2)
             {
-                if(blockObjects[j].objType == 2 && ((blockObjects[j].xPos == blockObjects[i].yPos + 30) || (blockObjects[j].yPos > blockObjects[i].xPos)))
+                if(true){std::cout << "found pit at xpos " << blockObjects[i].xPos << std::endl;}
+                for(int j = i+1; j < numBlockObjects; j++)
                 {
-                    if(true){std::cout << "found adj pit at xpos " << blockObjects[j].xPos << std::endl;}
-                    blockObjects[i].yPos = blockObjects[j].yPos;
-                    removeBlockAtIndex(j);
+                    if(blockObjects[j].objType == 2 && ((blockObjects[j].xPos == blockObjects[i].yPos) || (blockObjects[j].xPos < blockObjects[i].yPos)))
+                    {
+                        if(true){std::cout << "found adj pit at xpos " << blockObjects[j].xPos << std::endl;}
+                        blockObjects[i].yPos = blockObjects[j].yPos;
+                        removeBlockAtIndex(j);
+                        hitThisTime = true;
+                    }
                 }
             }
         }
+
+        mergeAdjacentPits(hitThisTime);
     }
 
 }

@@ -162,7 +162,7 @@ class Level
         void removeLastFalling();
 
         //housekeeping methods
-        void mergeAdjacentPits();
+        void mergeAdjacentPits(bool);
         void sortBlocks();
 
         void printSummary();
