@@ -219,32 +219,31 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
             return;
         }
 
-        BlockObject *tempBlockObject = new BlockObject;
+        BlockObject tempBlockObject;
     
         for(int i = 0; i < this->numBlockObjects; i++)
         {
 
-            tempBlockObject->objType = static_cast<int>(levelChars.at(currentByte));
-            if(debugMode){std::cout << "The current block type is " << tempBlockObject->objType << std::endl;}
+            tempBlockObject.objType = static_cast<int>(levelChars.at(currentByte));
+            if(debugMode){std::cout << "The current block type is " << tempBlockObject.objType << std::endl;}
             currentByte++;
     
-            tempBlockObject->xPos = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current block's xpos is " << tempBlockObject->xPos << std::endl;}
+            tempBlockObject.xPos = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current block's xpos is " << tempBlockObject.xPos << std::endl;}
             currentByte += 4;
     
-            tempBlockObject->yPos = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current block's ypos is " << tempBlockObject->yPos << std::endl;}
+            tempBlockObject.yPos = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current block's ypos is " << tempBlockObject.yPos << std::endl;}
             currentByte += 4;
     
-            tempBlockObject->indexInVec = i;
-            if(debugMode){std::cout << "This block can be found at index " << tempBlockObject->indexInVec << std::endl;}
-            this->blockObjects.push_back(*tempBlockObject);
+            tempBlockObject.indexInVec = i;
+            if(debugMode){std::cout << "This block can be found at index " << tempBlockObject.indexInVec << std::endl;}
+            this->blockObjects.push_back(tempBlockObject);
     
             if(debugMode){std::cout << "Loaded object successfully!" << std::endl;}
         }
     
         if(debugMode){std::cout << "Loaded " << this->blockObjects.size() << " object(s)!" << std::endl;}
-        delete tempBlockObject;
         
         if(levelChars.size() < (currentByte + 8))
         {
@@ -274,48 +273,47 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
             return;
         }
 
-        BackgroundChange *tempBackgroundChange = new BackgroundChange;
+        BackgroundChange tempBackgroundChange;
     
         for(int i = 0; i < this->numBackgroundChanges; i++)
         {
-            tempBackgroundChange->xPos = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current color trigger's xpos is " << tempBackgroundChange->xPos << std::endl;};
+            tempBackgroundChange.xPos = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current color trigger's xpos is " << tempBackgroundChange.xPos << std::endl;};
             currentByte += 4;
     
-            tempBackgroundChange->customTexture = static_cast<bool>(levelChars.at(currentByte));
+            tempBackgroundChange.customTexture = static_cast<bool>(levelChars.at(currentByte));
             currentByte++;
 
-            if(tempBackgroundChange->customTexture)
+            if(tempBackgroundChange.customTexture)
             {
                 if(debugMode){std::cout << "Attempting to read custom texture" << std::endl;}
 
-                tempBackgroundChange->filePath = readUTF8FromJava(levelChars, currentByte);
+                tempBackgroundChange.filePath = readUTF8FromJava(levelChars, currentByte);
 
                  //The short int at currentByte represents how many characters are in the filePath
                 currentByte += (readShortFromJava(levelChars, currentByte) + 2);
 
-                if(debugMode){std::cout << "This backgroundchange requests the texture " << tempBackgroundChange->filePath << std::endl;}
+                if(debugMode){std::cout << "This backgroundchange requests the texture " << tempBackgroundChange.filePath << std::endl;}
                 if(debugMode){std::cout << "Make sure it's defined in an atlas file!" << std::endl;}
                 
-                customTextures.push_back(tempBackgroundChange->filePath);
+                customTextures.push_back(tempBackgroundChange.filePath);
             }
             else
             {
-                tempBackgroundChange->colorID = readIntFromJava(levelChars, currentByte);
-                if(debugMode){std::cout << "The current color type is " << this->colorNames[tempBackgroundChange->colorID] << std::endl;}
+                tempBackgroundChange.colorID = readIntFromJava(levelChars, currentByte);
+                if(debugMode){std::cout << "The current color type is " << this->colorNames[tempBackgroundChange.colorID] << std::endl;}
                 currentByte += 4;
             }
     
-            tempBackgroundChange->indexInVec = i;
+            tempBackgroundChange.indexInVec = i;
     
-            if(debugMode){std::cout << "This color trigger can be found at index " << tempBackgroundChange->indexInVec << std::endl;}
-            this->backgroundChanges.push_back(*tempBackgroundChange);
+            if(debugMode){std::cout << "This color trigger can be found at index " << tempBackgroundChange.indexInVec << std::endl;}
+            this->backgroundChanges.push_back(tempBackgroundChange);
     
             if(debugMode){std::cout << "Loaded color trigger successfully!" << std::endl;}
         }
     
         if(debugMode){std::cout << "Loaded " << this->backgroundChanges.size() << " color trigger(s)!" << std::endl;}
-        delete tempBackgroundChange;
     
         //The next 4 bytes are the number of gravity changes in the level, stored as an int
         if(levelChars.size() < (currentByte + 4))
@@ -339,24 +337,23 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
             return;
         }
 
-        GravityChange *tempGravityChange = new GravityChange;
+        GravityChange tempGravityChange;
     
         for(int i = 0; i < this->numGravityChanges; i++)
         {
-            tempGravityChange->xPos = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current gravity trigger's xpos is " << tempGravityChange->xPos << std::endl;}
+            tempGravityChange.xPos = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current gravity trigger's xpos is " << tempGravityChange.xPos << std::endl;}
             currentByte += 4;
     
-            tempGravityChange->indexInVec = i;
+            tempGravityChange.indexInVec = i;
     
-            if(debugMode){std::cout << "This gravity trigger can be found at index " << tempGravityChange->indexInVec << std::endl;}
-            this->gravityChanges.push_back(*tempGravityChange);
+            if(debugMode){std::cout << "This gravity trigger can be found at index " << tempGravityChange.indexInVec << std::endl;}
+            this->gravityChanges.push_back(tempGravityChange);
     
             if(debugMode){std::cout << "Loaded gravity trigger successfully!" << std::endl;}
         }
     
         if(debugMode){std::cout << "Loaded " << this->gravityChanges.size() << " gravity trigger(s)!" << std::endl;}
-        delete tempGravityChange;
     
         //The next 4 bytes are the number of falling block fade effects, stored as an int
         if(levelChars.size() < (currentByte + 4))
@@ -380,28 +377,27 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
             return;
         }
 
-        BlocksFall *tempBlocksFall = new BlocksFall;
+        BlocksFall tempBlocksFall;
     
         for(int i = 0; i < this->numBlocksFall; i++)
         {
-            tempBlocksFall->startX = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current falling block startX is " << tempBlocksFall->startX << std::endl;}
+            tempBlocksFall.startX = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current falling block startX is " << tempBlocksFall.startX << std::endl;}
             currentByte += 4;
     
-            tempBlocksFall->endX = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current falling block endX is " << tempBlocksFall->endX << std::endl;}
+            tempBlocksFall.endX = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current falling block endX is " << tempBlocksFall.endX << std::endl;}
             currentByte += 4;
     
-            tempBlocksFall->indexInVec = i;
+            tempBlocksFall.indexInVec = i;
     
-            if(debugMode){std::cout << "This falling block section can be found at index " << tempBlocksFall->indexInVec << std::endl;}
-            this->blocksFalls.push_back(*tempBlocksFall);
+            if(debugMode){std::cout << "This falling block section can be found at index " << tempBlocksFall.indexInVec << std::endl;}
+            this->blocksFalls.push_back(tempBlocksFall);
     
             if(debugMode){std::cout << "Loaded falling block section successfully!" << std::endl;}
         }
     
         if(debugMode){std::cout << "Loaded " << this->blocksFalls.size() << " falling section(s)!" << std::endl;}
-        delete tempBlocksFall;
     
         //The next 4 bytes are the number of rising block fade effects, stored as an int
         if(levelChars.size() < (currentByte + 4))
@@ -425,28 +421,27 @@ void Level::loadLevel(std::vector<unsigned char> levelChars, bool debugMode)
             return;
         }
 
-        BlocksRise *tempBlocksRise = new BlocksRise;
+        BlocksRise tempBlocksRise;
     
         for(int i = 0; i < this->numBlocksRise; i++)
         {
-            tempBlocksRise->startX = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current rising block startX is " << tempBlocksRise->startX << std::endl;}
+            tempBlocksRise.startX = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current rising block startX is " << tempBlocksRise.startX << std::endl;}
             currentByte += 4;
     
-            tempBlocksRise->endX = readIntFromJava(levelChars, currentByte);
-            if(debugMode){std::cout << "The current rising block endX is " << tempBlocksRise->endX << std::endl;}
+            tempBlocksRise.endX = readIntFromJava(levelChars, currentByte);
+            if(debugMode){std::cout << "The current rising block endX is " << tempBlocksRise.endX << std::endl;}
             currentByte += 4;
     
-            tempBlocksRise->indexInVec = i;
+            tempBlocksRise.indexInVec = i;
     
-            if(debugMode){std::cout << "This rising block section can be found at index " << tempBlocksRise->indexInVec << std::endl;}
-            this->blocksRises.push_back(*tempBlocksRise);
+            if(debugMode){std::cout << "This rising block section can be found at index " << tempBlocksRise.indexInVec << std::endl;}
+            this->blocksRises.push_back(tempBlocksRise);
     
             if(debugMode){std::cout << "Loaded rising block section successfully!" << std::endl;}
         }
     
         if(debugMode){std::cout << "Loaded " << this->blocksRises.size() << " rising section(s)!" << std::endl;}
-        delete tempBlocksRise;
     }
 
     if(debugMode){std::cout << "Loaded entire level!" << std::endl;}
@@ -605,44 +600,44 @@ bool Level::getLoadedSuccessfully()
     return this->loadedSuccessfully;
 }
 
-void Level::addBlock(BlockObject *toAdd)
+void Level::addBlock(BlockObject toAdd)
 {
-    toAdd->indexInVec = this->numBlockObjects;
+    toAdd.indexInVec = this->numBlockObjects;
     numBlockObjects++;
-    this->blockObjects.push_back(*toAdd);
+    this->blockObjects.push_back(toAdd);
 }
 
-void Level::addBackground(BackgroundChange *toAdd)
+void Level::addBackground(BackgroundChange toAdd)
 {
-    toAdd->indexInVec = this->numBackgroundChanges;
+    toAdd.indexInVec = this->numBackgroundChanges;
     numBackgroundChanges++;
-    toAdd->colorName = this->colorNames[toAdd->colorID];
-    this->backgroundChanges.push_back(*toAdd);
-    if(toAdd->customTexture)
+    toAdd.colorName = this->colorNames[toAdd.colorID];
+    this->backgroundChanges.push_back(toAdd);
+    if(toAdd.customTexture)
     {
         this->customGraphicsEnabled = true;
     }
 }
 
-void Level::addGravity(GravityChange *toAdd)
+void Level::addGravity(GravityChange toAdd)
 {
-    toAdd->indexInVec = this->numGravityChanges;
+    toAdd.indexInVec = this->numGravityChanges;
     numGravityChanges++;
-    this->gravityChanges.push_back(*toAdd);
+    this->gravityChanges.push_back(toAdd);
 }
 
-void Level::addRising(BlocksRise *toAdd)
+void Level::addRising(BlocksRise toAdd)
 {
-    toAdd->indexInVec = this->numBlocksRise;
+    toAdd.indexInVec = this->numBlocksRise;
     numBlocksRise++;
-    this->blocksRises.push_back(*toAdd);
+    this->blocksRises.push_back(toAdd);
 }
 
-void Level::addFalling(BlocksFall *toAdd)
+void Level::addFalling(BlocksFall toAdd)
 {
-    toAdd->indexInVec = this->numBlocksFall;
+    toAdd.indexInVec = this->numBlocksFall;
     numBlocksFall++;
-    this->blocksFalls.push_back(*toAdd);
+    this->blocksFalls.push_back(toAdd);
 }
 
 void Level::setEndPos(int endPos)

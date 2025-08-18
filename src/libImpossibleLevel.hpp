@@ -142,11 +142,11 @@ class Level
         bool getLoadedSuccessfully();
 
         //set methods
-        void addBlock(BlockObject*);
-        void addBackground(BackgroundChange*);
-        void addGravity(GravityChange*);
-        void addRising(BlocksRise*);
-        void addFalling(BlocksFall*);
+        void addBlock(BlockObject);
+        void addBackground(BackgroundChange);
+        void addGravity(GravityChange);
+        void addRising(BlocksRise);
+        void addFalling(BlocksFall);
         void setEndPos(int);
 
         //removal methods
